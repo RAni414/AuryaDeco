@@ -1,0 +1,5 @@
+# Les photos uniquement : aucun script ne peut s'exécuter ici
+<FilesMatch "\.(php|php\d|phtml|phar|pl|py|cgi|sh)$">
+  Require all denied
+</FilesMatch>
+Options -Indexes

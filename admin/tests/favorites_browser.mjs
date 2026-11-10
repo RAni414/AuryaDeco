@@ -1,0 +1,75 @@
+import { browser, delay } from './browser-harness.mjs';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const base='http://127.0.0.1:8081';
+const output=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../verification-favoris');
+mkdirSync(output,{recursive:true});
+const checks=[];
+function check(value,label){checks.push({label,passed:!!value});if(!value)throw new Error(label);console.log('PASS '+label);}
+let app;
+try {
+  app=await browser(); const page=await app.page();
+  await page.call('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
+  await page.navigate(base+'/boutique.php');
+  await page.until(`document.querySelector('[data-favorite-id]')&&!document.querySelector('[data-favorite-id]').hidden`);
+  const first=await page.evaluate(`Number(document.querySelector('[data-favorite-id]').dataset.favoriteId)`);
+  const href=await page.evaluate(`document.querySelector('.pcard h3 a').href`);
+  await page.evaluate(`document.querySelector('[data-favorite-id]').click()`);
+  await page.until(`document.querySelector('[data-favorites-count]').textContent==='1'&&!document.querySelector('[data-favorite-id]').disabled`);
+  check(await page.evaluate(`location.pathname.endsWith('/boutique.php')&&document.querySelector('[data-favorite-id]').getAttribute('aria-pressed')==='true'`),'add without opening product');
+  check(await page.evaluate(`JSON.stringify(JSON.parse(localStorage.getItem('auryadeco:favorites:v1')))===JSON.stringify([${first}])`),'storage contains only product IDs');
+  await page.call('Page.reload'); await delay(700);
+  await page.until(`document.querySelector('[data-favorite-id]').getAttribute('aria-pressed')==='true'`);
+  check(true,'reload preserves favorite');
+  await page.navigate(href); await page.until(`document.querySelector('.favorite-media [data-favorite-id]').getAttribute('aria-pressed')==='true'`);
+  await page.evaluate(`document.querySelector('.favorite-media [data-favorite-id]').click()`);
+  await page.until(`document.querySelector('[data-favorites-count]').textContent==='0'`);
+  check(true,'product page remove and counter sync');
+  await page.navigate(base+'/boutique.php');
+  await page.until(`document.querySelector('[data-favorite-id]')&&!document.querySelector('[data-favorite-id]').hidden`);
+  await page.evaluate(`document.querySelector('[data-favorite-id]').click()`);
+  await page.until(`document.querySelector('[data-favorites-count]').textContent==='1'&&!document.querySelector('[data-favorite-id]').disabled`);
+  await page.navigate(base+'/includes/favoris.php');
+  await page.until(`document.querySelectorAll('[data-favorites-list] .pcard').length===1`);
+  check(await page.evaluate(`document.querySelector('.fav-buy')!==null`),'favorites page and existing cart form');
+  check(await page.evaluate(`(()=>{const s=document.querySelector('.fav-buy select');return !s||s.required;})()`),'variant must be chosen when necessary');
+  await page.evaluate(`(()=>{const f=document.querySelector('.fav-buy'),s=f.querySelector('select');if(s)s.value=[...s.options].find(o=>o.value&&!o.disabled).value;f.requestSubmit();})()`);
+  await page.until(`location.pathname.endsWith('/panier.php')&&document.querySelector('.badge[data-n]').dataset.n==='1'`);
+  check(true,'explicit add to existing cart');
+  await page.navigate(base+'/includes/favoris.php');
+  await page.until(`document.querySelector('[data-favorites-list] .pcard')!==null`);
+  for(const [width,height] of [[390,844],[768,1024],[1440,900]]){
+    await page.call('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});await delay(150);
+    check(await page.evaluate(`document.documentElement.scrollWidth<=innerWidth+1`),'no overflow at '+width+'px');
+    check(await page.evaluate(`document.querySelector('.favorites-link').getBoundingClientRect().width>0`),'header entry visible at '+width+'px');
+    await page.screenshot(path.join(output,'favoris-'+width+'.png'));
+  }
+  await page.evaluate(`document.querySelector('[data-favorites-list] [data-favorite-id]').click()`);
+  await page.until(`!document.querySelector('[data-favorites-empty]').hidden&&document.querySelector('[data-favorites-count]').textContent==='0'`);
+  check(true,'remove, empty state and zero counter');
+  await page.evaluate(`localStorage.setItem('auryadeco:favorites:v1','{broken')`);
+  await page.call('Page.reload');await delay(700);
+  await page.until(`document.querySelector('[data-favorites-warning]')&&!document.querySelector('[data-favorites-warning]').hidden`);
+  check(await page.evaluate(`localStorage.getItem('auryadeco:favorites:v1')==='[]'`),'invalid JSON repaired');
+  await page.evaluate(`localStorage.setItem('auryadeco:favorites:v1',JSON.stringify([${first},${first},'wrong',-1,4294967295]))`);
+  await page.call('Page.reload');await delay(700);
+  await page.until(`JSON.stringify(JSON.parse(localStorage.getItem('auryadeco:favorites:v1')))===JSON.stringify([${first}])`);
+  check(true,'invalid, duplicated and deleted IDs cleaned');
+  const second=await app.page();await second.navigate(base+'/boutique.php');
+  await second.until(`document.querySelector('[data-favorite-id="${first}"]').getAttribute('aria-pressed')==='true'`);
+  await second.evaluate(`document.querySelector('[data-favorite-id="${first}"]').click()`);
+  await page.until(`!document.querySelector('[data-favorites-empty]').hidden`);
+  check(true,'synchronization between tabs');
+  const blocked=await app.page();
+  await blocked.call('Page.addScriptToEvaluateOnNewDocument',{source:`Storage.prototype.getItem=function(){throw new DOMException('Blocked','SecurityError')};Storage.prototype.setItem=function(){throw new DOMException('Blocked','SecurityError')};`});
+  await blocked.navigate(base+'/boutique.php');
+  await blocked.until(`document.querySelector('[data-favorite-id]')&&!document.querySelector('[data-favorite-id]').hidden`);
+  await blocked.evaluate(`document.querySelector('[data-favorite-id]').click()`);
+  await blocked.until(`document.querySelector('[data-favorites-count]').textContent==='1'`);
+  check(await blocked.evaluate(`document.querySelector('[data-favorites-notice]').textContent.includes('temporaire')`),'blocked storage uses explicit temporary fallback');
+  await blocked.navigate(base+'/includes/favoris.php');
+  await blocked.until(`!document.querySelector('[data-favorites-empty]').hidden`);
+  check(await blocked.evaluate(`document.querySelector('[data-favorites-warning]').textContent.includes('bloqué')`),'blocked storage warning and no false persistence');
+} catch(error){checks.push({label:error.message,passed:false});console.error(error.message);process.exitCode=1;}
+finally{writeFileSync(path.join(output,'rapport.json'),JSON.stringify(checks,null,2));if(app)await app.close();}

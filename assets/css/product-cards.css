@@ -1,0 +1,32 @@
+.card-visual{position:relative;background:#f3f1e8}
+.pcard .card-gallery{position:relative;display:block;aspect-ratio:1/1.05;touch-action:pan-y pinch-zoom}
+.card-gallery .card-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:8px;box-sizing:border-box;opacity:0;transition:opacity .3s ease}
+.card-gallery .card-photo.is-active{opacity:1}
+/* The desktop photo swap works even if JavaScript is delayed or unavailable. */
+@media(hover:hover) and (pointer:fine){
+  .pcard:hover .card-gallery.has-hover-photo .card-photo{opacity:0}
+  .pcard:hover .card-gallery.has-hover-photo .card-photo:nth-child(2){opacity:1}
+}
+.card-actions{position:absolute;right:10px;top:10px;z-index:4;display:flex;flex-direction:column;gap:7px}
+.card-actions button,.card-actions .fav-toggle{position:static;width:44px;height:44px;display:grid;place-items:center;border:1px solid #d8dfd1;border-radius:50%;padding:10px;background:#fffdf6ed;color:#294735;cursor:pointer;box-shadow:0 3px 14px #22392814}
+.card-actions button[hidden]{display:none}
+.card-actions svg{width:22px;height:22px}
+.card-actions button:hover{background:#e8eddf}
+.card-actions button:focus-visible,.card-dots button:focus-visible{outline:3px solid #8a6e3e;outline-offset:2px}
+.card-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;z-index:3;background:#fffdf6df;border-radius:20px}
+.card-dots:empty{display:none}
+.card-dots button{width:24px;height:26px;border:0;background:transparent;padding:8px;cursor:pointer}
+.card-dots button:after{content:'';display:block;width:7px;height:7px;border-radius:50%;background:#b8bdaa}
+.card-dots button[aria-pressed=true]:after{background:#294735}
+@media(hover:hover) and (pointer:fine){.card-actions{opacity:0;transition:opacity .3s}.pcard:hover .card-actions,.pcard:focus-within .card-actions{opacity:1}}
+.card-quick{width:min(850px,94vw);max-height:90dvh;padding:24px;border:1px solid #ced6c6;border-radius:20px;background:#fbf9f1;color:#294735;overflow:auto}
+.card-quick::backdrop{background:#15291db3}
+.quick-close{display:block;margin-left:auto;background:#294735;color:#fff;border:0;border-radius:50%;width:44px;height:44px;font-size:24px;cursor:pointer}
+.quick-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.quick-image{display:block;width:100%;height:360px;object-fit:contain;background:#f3f1e8}
+.quick-controls{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0}
+.quick-controls button{min-width:44px;min-height:44px;border:1px solid #ced6c6;background:#f3f1e8;border-radius:8px;color:#294735}
+.card-quick [hidden]{display:none!important}
+.card-quick form{display:grid;gap:12px;margin:18px 0}.card-quick select{width:100%}.card-quick a{display:inline-block;margin-top:14px}
+@media(max-width:600px){.quick-layout{grid-template-columns:1fr}.quick-image{height:260px}.card-quick{padding:16px}}
+@media(prefers-reduced-motion:reduce){.card-gallery .card-photo,.card-actions{transition:none}}

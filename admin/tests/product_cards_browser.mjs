@@ -1,0 +1,67 @@
+import {browser, delay} from './browser-harness.mjs';
+const base = 'http://127.0.0.1:8000';
+function check(value,label){if(!value)throw new Error(label);console.log('PASS '+label);}
+let app;
+try {
+  app=await browser();const page=await app.page();
+  await page.call('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await page.call('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+  await page.navigate(base+'/boutique.php');
+  await page.until(`document.querySelector('[data-card-ready]')`);
+  check(await page.evaluate(`!!document.querySelector('[data-card-cart]:not([hidden])')`),'card actions initialized');
+  await page.evaluate(`document.querySelector('[data-card-preview]').click()`);
+  check(await page.evaluate(`document.querySelector('dialog').open && document.activeElement.matches('.quick-close') && !document.querySelector('[data-no-photo]').hidden`),'preview without photo and initial focus');
+  check(await page.evaluate(`document.querySelector('[data-product-link]').href===document.querySelector('.pcard h3 a').href`),'product link preserved');
+  await page.call('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await page.call('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  check(await page.evaluate(`!document.querySelector('dialog').open && document.activeElement.matches('[data-card-preview]')`),'Escape closes and restores focus');
+  await page.evaluate(`document.querySelector('[data-card-cart]').click()`);
+  check(await page.evaluate(`document.querySelector('dialog form').action.endsWith('/panier.php') && document.querySelector('dialog form').elements.csrf.value.length>0 && document.querySelector('dialog form').elements.action.value==='add'`),'existing cart endpoint and CSRF reused');
+  check(await page.evaluate(`document.querySelector('dialog select').options.length<3 || (document.querySelector('dialog select').value==='' && document.querySelector('dialog [type=submit]').disabled)`),'multiple variants require explicit choice');
+  await page.evaluate(`document.querySelector('.quick-close').click();document.querySelector('.card-actions [data-favorite-id]').click()`);
+  await page.until(`document.querySelector('.card-actions [data-favorite-id]').getAttribute('aria-pressed')==='true'`);
+  check(await page.evaluate(`location.pathname==='/boutique.php'`),'favorites do not navigate');
+  // Test-only inline images; no catalogue or uploaded files are changed.
+  await page.evaluate(`(() => {
+    const original=document.querySelector('.card-visual'), card=original.closest('.pcard').cloneNode(true);
+    const visual=card.querySelector('.card-visual');visual.removeAttribute('data-card-ready');
+    const data=JSON.parse(visual.dataset.cardDetails);
+    data.photos=['#294735','#e6d8b5','#8a6e3e'].map(c=>'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300"><rect width="200" height="300" fill="'+c+'"/></svg>'));
+    visual.dataset.cardDetails=JSON.stringify(data);
+    const gallery=visual.querySelector('.card-gallery');gallery.classList.add('has-hover-photo');gallery.replaceChildren();
+    data.photos.forEach((src,i)=>{const img=new Image();img.src=src;img.className='card-photo'+(i===0?' is-active':'');gallery.append(img)});
+    visual.querySelector('.card-dots').replaceChildren();card.id='photo-test';document.querySelector('.grid').prepend(card);
+  })()`);
+  await page.until(`document.querySelectorAll('#photo-test .card-dots button').length===3`);
+  check(await page.evaluate(`getComputedStyle(document.querySelector('#photo-test img')).objectFit==='contain' && getComputedStyle(document.querySelector('#photo-test img')).transitionDuration==='0.3s'`),'contain framing and 300 ms fade');
+  await page.evaluate(`document.querySelector('#photo-test').scrollIntoView({block:'center'})`);
+  const hoverBox=await page.evaluate(`(()=>{const r=document.querySelector('#photo-test').getBoundingClientRect();return{x:r.x+20,y:r.y+20}})()`);
+  await page.call('Input.dispatchMouseEvent',{type:'mouseMoved',...hoverBox});await delay(400);
+  check(await page.evaluate(`!matchMedia('(hover:hover) and (pointer:fine)').matches || getComputedStyle(document.querySelector('#photo-test .card-photo:nth-child(2)')).opacity==='1'`),'desktop second image on real hover');
+  await page.call('Input.dispatchMouseEvent',{type:'mouseMoved',x:0,y:0});await delay(400);
+  check(await page.evaluate(`getComputedStyle(document.querySelector('#photo-test .card-photo')).opacity==='1'`),'primary photo restored');
+  await page.evaluate(`document.querySelector('#photo-test [data-card-preview]').click();document.querySelector('[data-next]').click()`);
+  check(await page.evaluate(`document.querySelector('[data-photo-count]').textContent==='2 / 3'`),'quick preview gallery navigation');
+  await page.evaluate(`document.querySelector('.quick-close').focus()`);
+  await page.call('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9,modifiers:8});
+  check(await page.evaluate(`document.activeElement.matches('[data-product-link]')`),'focus stays within modal');
+  await page.evaluate(`document.querySelector('.quick-close').click()`);
+  await page.call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  await page.call('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:1});
+  await page.evaluate(`document.querySelector('#photo-test').scrollIntoView()`);
+  const box=await page.evaluate(`(()=>{const r=document.querySelector('#photo-test .card-gallery').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()`);
+  await page.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:box.x+50,y:box.y}]});
+  await page.call('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:box.x-50,y:box.y+2}]});
+  await page.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await delay(350);
+  check(await page.evaluate(`document.querySelector('#photo-test .card-visual').dataset.slide==='1' && location.pathname==='/boutique.php'`),'mobile swipe switches photo without navigation');
+  check(await page.evaluate(`getComputedStyle(document.querySelector('#photo-test .card-gallery')).touchAction.includes('pan-y') && getComputedStyle(document.querySelector('#photo-test .card-actions')).opacity==='1'`),'mobile actions visible and vertical scrolling allowed');
+  await page.call('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+  check(await page.evaluate(`getComputedStyle(document.querySelector('#photo-test img')).transitionDuration==='0s'`),'reduced motion honored');
+  await page.evaluate(`document.querySelector('#photo-test .card-dots button').click()`);
+  await page.screenshot(new URL('../verification-product-cards-mobile.png',import.meta.url).pathname.replace(/^\/([A-Za-z]:)/,'$1'));
+  await page.navigate(base+'/index.php');await page.until(`document.querySelector('[data-card-ready]')`);check(true,'home shares enhanced cards');
+  await page.navigate(base+'/includes/favoris.php');
+  await page.until(`document.querySelector('[data-card-ready]')`);
+  check(await page.evaluate(`!!document.querySelector('.pcard .card-actions [data-card-preview]')`),'favorites dynamically initialize common photo cards');
+  console.log('Browser checks completed');
+} finally {if(app)await app.close();}

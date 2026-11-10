@@ -1,0 +1,50 @@
+import {browser,delay} from './browser-harness.mjs';
+import {fileURLToPath} from 'node:url';
+const base='http://127.0.0.1:8000';
+function check(ok,label){if(!ok)throw new Error(label);console.log('PASS '+label);}
+let app;
+try {
+  app=await browser();const page=await app.page();
+  await page.call('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await page.navigate(base+'/');await page.until(`document.querySelector('.product-pagination button')`);
+  const measurements=()=>page.evaluate(`(()=>{const t=document.querySelector('.product-track'),c=t.firstElementChild;return{visible:Math.round(t.clientWidth/c.getBoundingClientRect().width),overflow:document.documentElement.scrollWidth>innerWidth,left:t.scrollLeft,y:scrollY}})()`);
+  let m=await measurements();check(m.visible===3&&!m.overflow,'desktop: three cards and no page overflow');
+  check(await page.evaluate(`document.querySelector('[data-product-prev]').disabled`),'previous disabled at start');
+  await page.evaluate(`document.querySelector('.product-track').scrollIntoView({block:'center'});window.__beforeY=scrollY;document.querySelector('[data-product-next]').click()`);await delay(800);
+  check(await page.evaluate(`document.querySelector('.product-track').scrollLeft>0&&scrollY===window.__beforeY`),'next scrolls horizontally without vertical movement');
+  await page.evaluate(`document.querySelector('.product-pagination button:last-child').click()`);await delay(800);
+  check(await page.evaluate(`document.querySelector('[data-product-next]').disabled && document.querySelector('.product-pagination button:last-child').getAttribute('aria-current')==='true'`),'pagination reaches final page');
+  await page.evaluate(`document.querySelector('.product-pagination button').click()`);await delay(800);
+  check(await page.evaluate(`document.querySelector('.product-track').scrollLeft<2`),'pagination returns to start');
+  await page.evaluate(`document.querySelector('.product-track').focus({preventScroll:true})`);
+  await page.call('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});await delay(800);
+  check((await measurements()).left>0,'keyboard right navigation');
+  await page.evaluate(`document.querySelector('.product-pagination button').click()`);await delay(800);
+  await page.evaluate(`document.querySelector('.product-track [data-card-preview]').click()`);
+  check(await page.evaluate(`document.querySelector('.card-quick').open`),'quick preview preserved');
+  await page.evaluate(`document.querySelector('.quick-close').click();document.querySelector('.product-track [data-card-cart]').click()`);
+  check(await page.evaluate(`document.querySelector('.card-quick').open && document.querySelector('.card-quick form').action.endsWith('/panier.php') && (document.querySelector('.card-quick select').options.length<3 || document.querySelector('.card-quick select').value==='')`),'cart and variant selection preserved');
+  await page.evaluate(`document.querySelector('.quick-close').click();document.querySelector('.product-track [data-favorite-id]').click()`);
+  await page.until(`document.querySelector('.product-track [data-favorite-id]').getAttribute('aria-pressed')==='true'`);
+  check(await page.evaluate(`location.pathname==='/'`),'favorite updates without navigating');
+  await page.call('Emulation.setDeviceMetricsOverride',{width:800,height:1000,deviceScaleFactor:1,mobile:false});await delay(350);
+  check((await measurements()).visible===2&&!(await measurements()).overflow,'tablet: two cards');
+  await page.call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  await page.call('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:1});await delay(400);
+  check((await measurements()).visible===1&&!(await measurements()).overflow,'mobile: one card and no page overflow');
+  await page.evaluate(`document.querySelector('.product-pagination button').click();document.querySelector('.product-track').scrollIntoView({block:'center'})`);await delay(700);
+  const pos=await page.evaluate(`(()=>{const r=document.querySelector('.product-track').getBoundingClientRect();return{x:r.x+r.width*.8,y:r.y+r.height*.55}})()`);
+  await page.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:pos.x,y:pos.y}]});
+  for(let i=1;i<=6;i++){await page.call('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:pos.x-30*i,y:pos.y+1}]});await delay(30);}
+  await page.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await delay(1000);
+  check((await measurements()).left>50&&await page.evaluate(`location.pathname==='/'`),'mobile swipe moves products without opening links');
+  await page.call('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+  await page.evaluate(`window.__behaviors=[];const t=document.querySelector('.product-track');const orig=t.scrollTo.bind(t);t.scrollTo=o=>{window.__behaviors.push(o.behavior);orig(o)};document.querySelector('.product-pagination button').click()`);
+  check(await page.evaluate(`window.__behaviors.at(-1)==='instant'`),'reduced motion disables smooth scrolling');
+  await page.screenshot(fileURLToPath(new URL('../verification-carousel-mobile.png',import.meta.url)));
+  const href=await page.evaluate(`document.querySelector('.product-track h3 a').href`);
+  await page.evaluate(`document.querySelector('.product-track h3 a').click()`);await delay(600);
+  check(await page.evaluate(`location.href===${JSON.stringify(href)}`),'ordinary click opens product');
+  await page.navigate(base+'/boutique.php');
+  check(await page.evaluate(`!!document.querySelector('.grid .pcard')&&!document.querySelector('[data-product-carousel]')`),'shop retains its grid');
+}finally{if(app)await app.close();}

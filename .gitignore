@@ -1,0 +1,11 @@
+﻿config.php
+.env
+.env.*
+*.bak
+*.log
+*.key
+*.pem
+node_modules/
+vendor/
+admin/verification/
+admin/verification-*
