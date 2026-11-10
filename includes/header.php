@@ -26,6 +26,7 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <link rel="stylesheet" href="<?= e(url('assets/css/product-cards.css')) ?>?v=2">
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/product-carousel.css')) ?>?v=1"><?php endif; ?>
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/home.css')) ?>?v=2"><?php endif; ?>
+<link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪴</text></svg>">
 </head>
 <body<?= $commercePage ? ' class="commerce-page"' : '' ?>>

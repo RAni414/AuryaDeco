@@ -43,6 +43,20 @@
 
 <?php endif; ?>
 </div>
+<?php
+$mobilePage = basename($_SERVER['SCRIPT_NAME'] ?? 'index.php');
+$mobileLinks = [
+    ['index.php', 'Accueil', 'M3 10 12 3l9 7v11h-6v-7H9v7H3z'],
+    ['boutique.php', 'Boutique', 'M3 9h18M5 9v12h14V9M3 9l2-6h14l2 6M9 21v-7h6v7'],
+    ['includes/favoris.php', 'Favoris', 'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z'],
+    ['panier.php', 'Panier', 'M5 7h14l2 14H3L5 7ZM9 8V6a3 3 0 0 1 6 0v2'],
+];
+?>
+<nav class="mobile-dock" aria-label="Navigation mobile">
+<?php foreach ($mobileLinks as [$path, $label, $icon]): ?>
+  <a href="<?= e(url($path)) ?>"<?= $mobilePage === basename($path) ? ' aria-current="page"' : '' ?>><span class="mobile-dock-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="<?= e($icon) ?>"/></svg><?php if ($label === 'Panier'): ?><span class="badge" data-n="<?= cart_count() ?>"><?= cart_count() ?></span><?php elseif ($label === 'Favoris'): ?><span class="fav-count" data-favorites-count hidden>0</span><?php endif; ?></span><span><?= e($label) ?></span></a>
+<?php endforeach; ?>
+</nav>
 <script src="<?= e(url('assets/js/art.js')) ?>?v=1"></script>
 <script src="<?= e(url('assets/js/shop.js')) ?>?v=1"></script>
 <script src="<?= e(url('assets/js/product-cards.js')) ?>?v=3" data-card-script data-cart="<?= e(url('panier.php')) ?>" data-csrf="<?= e(csrf_token()) ?>" defer></script>
