@@ -28,6 +28,9 @@
     <div>
       <h4>Nous contacter</h4>
       <?php if (public_contact_number() !== ''): ?><p><?= e(public_contact_number()) ?></p><?php endif; ?>
+      <?php if (public_contact_number('whatsapp') !== ''): ?>
+      <p><a class="footer-whatsapp" href="<?= e(wa_link('Bonjour ' . setting('shop_name') . ', ')) ?>" target="_blank" rel="noopener noreferrer">Nous écrire sur WhatsApp ↗</a></p>
+      <?php endif; ?>
       <p><a href="mailto:<?= e(setting('email')) ?>"><?= e(setting('email')) ?></a></p>
       <p><?= e(setting('address')) ?></p>
     </div>

@@ -21,7 +21,7 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(url('assets/css/style.css')) ?>?v=1">
 <link rel="stylesheet" href="<?= e(url('assets/css/deco.css')) ?>?v=3">
-<link rel="stylesheet" href="<?= e(url('assets/css/interface.css')) ?>?v=1">
+<link rel="stylesheet" href="<?= e(url('assets/css/interface.css')) ?>?v=3">
 <link rel="stylesheet" href="<?= e(url('assets/css/favorites.css')) ?>?v=1">
 <link rel="stylesheet" href="<?= e(url('assets/css/product-cards.css')) ?>?v=2">
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/product-carousel.css')) ?>?v=1"><?php endif; ?>
