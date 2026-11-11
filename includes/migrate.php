@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Version 2 : frais de livraison par produit + avis clients.
  * Les produits, commandes et photos existants ne sont pas touchés.
  */
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 function run_migrations(PDO $pdo): void
 {
@@ -34,6 +34,14 @@ function run_migrations(PDO $pdo): void
           position INT NOT NULL DEFAULT 0,
           created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
           KEY idx_active (active, position)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+    if ($cur < 3) {
+        // Version 3 : limite des tentatives de connexion par adresse IP (hachée).
+        $pdo->exec("CREATE TABLE IF NOT EXISTS login_attempts (
+          ip_hash CHAR(64) NOT NULL PRIMARY KEY,
+          fails INT UNSIGNED NOT NULL DEFAULT 0,
+          last_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
     $pdo->prepare("INSERT INTO settings (k, v) VALUES ('db_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)")->execute([(string)DB_VERSION]);

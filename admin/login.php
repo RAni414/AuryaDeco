@@ -7,7 +7,7 @@ $error = '';
 if (is_post()) {
     csrf_check();
     $_SESSION['login_fails'] = $_SESSION['login_fails'] ?? 0;
-    if ($_SESSION['login_fails'] >= 5 && time() - ($_SESSION['login_last'] ?? 0) < 300) {
+    if (login_ip_blocked() || ($_SESSION['login_fails'] >= 5 && time() - ($_SESSION['login_last'] ?? 0) < 300)) {
         $error = 'Trop de tentatives. Attendez 5 minutes avant de réessayer.';
     } else {
         $st = db()->prepare('SELECT * FROM admins WHERE username = ?');
@@ -17,6 +17,7 @@ if (is_post()) {
             session_regenerate_id(true);
             $_SESSION['admin_id'] = (int)$a['id'];
             unset($_SESSION['login_fails']);
+            login_ip_clear();
             if (password_needs_rehash($a['password_hash'], PASSWORD_DEFAULT)) {
                 db()->prepare('UPDATE admins SET password_hash = ? WHERE id = ?')->execute([password_hash((string)$_POST['password'], PASSWORD_DEFAULT), $a['id']]);
             }
@@ -24,6 +25,7 @@ if (is_post()) {
         }
         $_SESSION['login_fails']++;
         $_SESSION['login_last'] = time();
+        login_ip_failed();
         usleep(600000);
         $error = 'Identifiant ou mot de passe incorrect.';
     }

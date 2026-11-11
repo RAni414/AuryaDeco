@@ -16,6 +16,39 @@ function current_admin(): ?array
     return $a;
 }
 
+/* ---------- Limite des tentatives de connexion par IP ---------- */
+const LOGIN_MAX_FAILS = 10;
+const LOGIN_BLOCK_SECONDS = 900;
+
+function login_throttle_key(): string
+{
+    // Derrière Traefik, mod_remoteip remplace REMOTE_ADDR par l'IP réelle du visiteur.
+    return hash('sha256', (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+}
+
+function login_ip_blocked(): bool
+{
+    // Comparaison faite par MySQL (même horloge que NOW() à l'écriture), indépendante du fuseau PHP.
+    $st = db()->prepare('SELECT fails FROM login_attempts WHERE ip_hash = ? AND last_at > NOW() - INTERVAL ? SECOND');
+    $st->execute([login_throttle_key(), LOGIN_BLOCK_SECONDS]);
+    return (int)$st->fetchColumn() >= LOGIN_MAX_FAILS;
+}
+
+function login_ip_failed(): void
+{
+    // Le compteur repart de 1 quand la dernière erreur date de plus de LOGIN_BLOCK_SECONDS.
+    db()->prepare('INSERT INTO login_attempts (ip_hash, fails, last_at) VALUES (?, 1, NOW())
+        ON DUPLICATE KEY UPDATE fails = IF(last_at < NOW() - INTERVAL ? SECOND, 1, fails + 1), last_at = NOW()')
+        ->execute([login_throttle_key(), LOGIN_BLOCK_SECONDS]);
+    // Ménage : les anciennes entrées ne servent plus.
+    db()->exec('DELETE FROM login_attempts WHERE last_at < NOW() - INTERVAL 1 DAY');
+}
+
+function login_ip_clear(): void
+{
+    db()->prepare('DELETE FROM login_attempts WHERE ip_hash = ?')->execute([login_throttle_key()]);
+}
+
 function require_admin(): array
 {
     $a = current_admin();
@@ -77,7 +110,7 @@ function admin_footer(): void
     ?>
 </main>
 <script src="<?= e(url('assets/js/art.js')) ?>?v=1"></script>
-<script src="<?= e(url('assets/js/admin.js')) ?>?v=2"></script>
+<script src="<?= e(url('assets/js/admin.js')) ?>?v=3"></script>
 </body>
 </html>
 <?php
