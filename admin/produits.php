@@ -38,7 +38,7 @@ admin_header('Produits', 'produits');
 <div class="shead"><h1>Produits</h1><a class="btn" href="<?= e(url('admin/produit.php')) ?>">Ajouter un produit</a></div>
 <form class="atool" method="get">
   <input type="search" name="q" value="<?= e($q) ?>" placeholder="Rechercher un produit" aria-label="Rechercher un produit">
-  <select name="kind" aria-label="Catégorie" onchange="this.form.submit()"><option value="">Toutes les catégories</option><?php foreach (KINDS as $k => $l): ?><option value="<?= $k ?>" <?= $kind === $k ? 'selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select>
+  <select name="kind" aria-label="Catégorie" data-autosubmit><option value="">Toutes les catégories</option><?php foreach (KINDS as $k => $l): ?><option value="<?= $k ?>" <?= $kind === $k ? 'selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select>
   <button class="btn ghost">Filtrer</button>
 </form>
 <p class="hint"><?= count($list) ?> produit<?= count($list) > 1 ? 's' : '' ?>. L'étoile met un produit en avant sur la page d'accueil. Un produit masqué n'apparaît plus dans la boutique.</p>

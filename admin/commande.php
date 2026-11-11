@@ -34,7 +34,7 @@ $msg = 'Bonjour ' . explode(' ', $o['customer_name'])[0] . ', ici ' . setting('s
 admin_header('Commande ' . $o['number'], 'commandes');
 ?>
 <div class="crumbs noprint"><a href="<?= e(url('admin/commandes.php')) ?>">Commandes</a> / <?= e($o['number']) ?></div>
-<div class="shead"><h1>Commande <?= e($o['number']) ?></h1><div class="acts noprint"><button class="sbtn" onclick="window.print()">Imprimer le bon</button></div></div>
+<div class="shead"><h1>Commande <?= e($o['number']) ?></h1><div class="acts noprint"><button class="sbtn" type="button" data-print>Imprimer le bon</button></div></div>
 <p class="muted">Passée le <?= e(date('d/m/Y à H:i', strtotime($o['created_at']))) ?> · <?= status_badge($o['status']) ?></p>
 <div class="cols">
   <section class="card">

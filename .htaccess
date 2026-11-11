@@ -2,15 +2,55 @@
 Options -Indexes
 DirectoryIndex index.php
 
-# Protéger la configuration
+# Protéger la configuration et les fichiers qui ne doivent pas être servis
 <Files "config.php">
   Require all denied
 </Files>
+<FilesMatch "(\.(md|sql|ps1|sh|mjs|py|bak|log|ini|lock|dist)|^\.env.*|^config\.sample\.php|^Dockerfile|^docker-compose.*\.yml)$">
+  Require all denied
+</FilesMatch>
 
-# Forcer HTTPS : retirez les # des 3 lignes ci-dessous une fois le certificat SSL actif
-# RewriteEngine On
-# RewriteCond %{HTTPS} !=on
-# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Vérification de santé : /health
+  RewriteRule ^health/?$ health.php [L]
+
+  # Forcer HTTPS (hébergement classique) : retirez les # des 2 lignes ci-dessous une fois le certificat SSL actif.
+  # Inutile sur EasyPanel : Traefik s'en charge.
+  # RewriteCond %{HTTPS} !=on
+  # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# En-têtes de sécurité
+<IfModule mod_headers.c>
+  Header always unset X-Powered-By
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; form-action 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'"
+  Header always set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on' || %{HTTP:X-Forwarded-Proto} == 'https'"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# Cache navigateur (les CSS/JS sont versionnés avec ?v=)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType text/javascript "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/x-icon "access plus 30 days"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
 
 # Taille maximale des photos envoyées (si votre hébergeur l'autorise)
 <IfModule mod_php.c>

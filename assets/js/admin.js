@@ -53,3 +53,26 @@
   });
   });
 })();
+
+// Gestes sans JavaScript en ligne (compatible avec la Content-Security-Policy).
+(function () {
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-print]')) window.print();
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target.matches('[data-autosubmit]') && e.target.form) e.target.form.submit();
+  });
+
+  // Fiche d'un avis client : compteur de caractères et aperçu de la photo.
+  var c = document.getElementById('comment'), n = document.getElementById('count');
+  if (c && n) c.addEventListener('input', function () { n.textContent = c.value.length; });
+  var i = document.getElementById('photoInput'), p = document.getElementById('photoPreview');
+  if (i && p && !document.getElementById('edForm')) i.addEventListener('change', function () {
+    p.innerHTML = '';
+    var f = i.files[0];
+    if (!f || !/^image\//.test(f.type)) return;
+    var d = document.createElement('div'); d.className = 'photo';
+    var m = document.createElement('img'); m.src = URL.createObjectURL(f); m.alt = '';
+    d.appendChild(m); p.appendChild(d);
+  });
+})();

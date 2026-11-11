@@ -91,12 +91,4 @@ admin_header($r['id'] ? "Modifier l'avis" : 'Nouvel avis', 'avis');
     </div>
   </aside>
 </form>
-<script>
-(function(){
-  var c=document.getElementById('comment'),n=document.getElementById('count');
-  if(c)c.addEventListener('input',function(){n.textContent=c.value.length});
-  var i=document.getElementById('photoInput'),p=document.getElementById('photoPreview');
-  if(i)i.addEventListener('change',function(){p.innerHTML='';var f=i.files[0];if(!f||!/^image\//.test(f.type))return;var d=document.createElement('div');d.className='photo';var m=document.createElement('img');m.src=URL.createObjectURL(f);m.alt='';d.appendChild(m);p.appendChild(d);});
-})();
-</script>
 <?php admin_footer();
