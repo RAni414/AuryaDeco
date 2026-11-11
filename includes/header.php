@@ -26,7 +26,7 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <link rel="stylesheet" href="<?= e(url('assets/css/product-cards.css')) ?>?v=2">
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/product-carousel.css')) ?>?v=1"><?php endif; ?>
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/home.css')) ?>?v=2"><?php endif; ?>
-<link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=1">
+<link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=2">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪴</text></svg>">
 </head>
 <body<?= $commercePage ? ' class="commerce-page"' : '' ?>>
@@ -42,8 +42,7 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
     <a class="logo" href="<?= e(url('index.php')) ?>" aria-label="Accueil">
-      <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 36V17" stroke="var(--forest)" stroke-width="2" fill="none"/><path d="M20 22C12 22 7 16 7 7c9 0 13 6 13 15z" fill="var(--sage)"/><path d="M20 19c0-8 4-13 13-13 0 8-5 13-13 13z" fill="var(--forest)"/><path d="M12 30h16l-2 7H14z" fill="var(--brass)"/></svg>
-      <span><?= $logoHtml ?></span>
+      <img class="aurya-brand-image" src="<?= e(url('assets/images/aurya-logo.png')) ?>" width="1774" height="887" alt="Aurya Déco" fetchpriority="high">
     </a>
     <form class="search" role="search" action="<?= e(url('boutique.php')) ?>" method="get">
       <input type="search" name="q" value="<?= e($q) ?>" placeholder="Rechercher une plante, un pot…" aria-label="Rechercher">

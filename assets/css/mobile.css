@@ -53,3 +53,8 @@
   .co .card{padding:18px}.cart-list .line{grid-template-columns:60px minmax(0,1fr);gap:12px}.cart-list .line .lt{grid-column:2;text-align:left}.cart-list .line .lt .rm{margin-left:0}.line .qty{max-width:100%}
 }
 @media(max-width:359px){.grid{gap:8px}.home-hero h1{font-size:32px}.aurya-home .home-universes .cats{grid-template-columns:1fr}.hrow .logo span{font-size:22px}}
+
+/* Logo officiel fourni par AuryaDeco : proportions conservées. */
+header.site .logo .aurya-brand-image{display:block;width:180px;height:90px;object-fit:contain;max-width:100%}
+@media(max-width:860px){header.site .logo .aurya-brand-image{width:140px;height:70px}}
+@media(max-width:390px){header.site .logo .aurya-brand-image{width:116px;height:58px}}
