@@ -1,6 +1,8 @@
 ﻿config.php
 .env
 .env.*
+!.env.example
+docker-compose.override.yml
 *.bak
 *.log
 *.key

@@ -1,0 +1,5 @@
+# Fichiers exécutés dans le conteneur Linux : toujours en fins de ligne LF.
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+docker/*        text eol=lf
+.dockerignore   text eol=lf

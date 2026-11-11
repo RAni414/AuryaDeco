@@ -1,0 +1,36 @@
+# Git et éditeurs
+.git
+.gitignore
+.gitattributes
+.github
+.vscode
+.idea
+.claude
+
+# Secrets et configuration locale
+.env
+.env.*
+!.env.example
+config.php
+*.key
+*.pem
+
+# Dépendances, journaux, sauvegardes
+node_modules
+vendor
+*.log
+*.bak
+*.tmp
+
+# Tests, outils locaux et documentation
+admin/tests
+admin/verification
+admin/verification-*
+admin/*.ps1
+admin/*.md
+*.md
+docker-compose*.yml
+
+# Photos : stockées dans le volume EasyPanel, pas dans l'image
+uploads/*
+!uploads/.htaccess
