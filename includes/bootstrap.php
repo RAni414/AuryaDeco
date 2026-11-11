@@ -7,13 +7,13 @@ declare(strict_types=1);
 define('APP_DIR', dirname(__DIR__));
 define('UPLOAD_DIR', APP_DIR . '/uploads');
 
-$configFile = APP_DIR . '/config.php';
-if (!is_file($configFile)) {
+require __DIR__ . '/config-loader.php';
+$CONFIG = app_config(APP_DIR);
+if ($CONFIG === null) {
     $installUrl = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') !== false ? '../' : '') . 'install.php';
     header('Location: ' . $installUrl);
     exit;
 }
-$CONFIG = require $configFile;
 
 date_default_timezone_set($CONFIG['timezone'] ?? 'Africa/Tunis');
 if (!empty($CONFIG['debug'])) {
@@ -45,16 +45,12 @@ session_start();
 require __DIR__ . '/helpers.php';
 
 try {
-    $pdo = new PDO(
-        'mysql:host=' . $CONFIG['db_host'] . ';port=' . ($CONFIG['db_port'] ?? 3306) . ';dbname=' . $CONFIG['db_name'] . ';charset=utf8mb4',
-        $CONFIG['db_user'],
-        $CONFIG['db_pass'],
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, PDO::ATTR_EMULATE_PREPARES => false]
-    );
+    $pdo = app_pdo($CONFIG);
 } catch (PDOException $ex) {
-    http_response_code(500);
+    http_response_code(503);
+    error_log('AuryaDeco: database connection failed: ' . $ex->getMessage());
     echo '<!doctype html><meta charset="utf-8"><title>Base de données indisponible</title><body style="font-family:sans-serif;max-width:600px;margin:60px auto">';
-    echo '<h1>Connexion à la base de données impossible</h1><p>Vérifiez les informations de connexion dans le fichier <code>config.php</code> (hôte, nom de la base, utilisateur, mot de passe) et que le serveur MySQL est démarré.</p>';
+    echo '<h1>Connexion à la base de données impossible</h1><p>Vérifiez les informations de connexion (variables DB_* ou fichier <code>config.php</code> : hôte, nom de la base, utilisateur, mot de passe) et que le serveur MySQL est démarré.</p>';
     if (!empty($CONFIG['debug'])) {
         echo '<pre>' . htmlspecialchars($ex->getMessage()) . '</pre>';
     }

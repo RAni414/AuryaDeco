@@ -4,6 +4,14 @@
  * Supprimez ce fichier une fois l'installation terminée.
  */
 declare(strict_types=1);
+require __DIR__ . '/includes/config-loader.php';
+require __DIR__ . '/includes/installer.php';
+// Docker / EasyPanel : la configuration vient de l'environnement et l'installation
+// est faite au démarrage du conteneur. L'assistant web est donc désactivé.
+if (app_env_config() !== null) {
+    http_response_code(404);
+    exit('Not found');
+}
 session_start();
 $configFile = __DIR__ . '/config.php';
 $done = false;
@@ -30,8 +38,7 @@ if (!$already && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (version_compare(PHP_VERSION, '7.4.0', '<')) $errors[] = 'PHP 7.4 ou plus récent est nécessaire (version actuelle : ' . PHP_VERSION . ').';
     if (!extension_loaded('pdo_mysql')) $errors[] = "L'extension PHP pdo_mysql n'est pas activée sur ce serveur.";
     if (trim($v['db_name']) === '' || trim($v['db_user']) === '') $errors[] = "Indiquez le nom de la base et l'utilisateur.";
-    if (!preg_match('/^[A-Za-z0-9_.-]{3,60}$/', $v['admin_user'])) $errors[] = "L'identifiant administrateur doit faire 3 à 60 caractères (lettres, chiffres, point, tiret).";
-    if (strlen($pass) < 8) $errors[] = 'Le mot de passe administrateur doit contenir au moins 8 caractères.';
+    $errors = array_merge($errors, admin_credentials_errors($v['admin_user'], $pass));
     if ($pass !== ($_POST['admin_pass2'] ?? '')) $errors[] = 'Les deux mots de passe ne sont pas identiques.';
 
     if (!$errors) {
@@ -44,29 +51,7 @@ if (!$already && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Sur un hébergement, la base est créée depuis le panneau : on continue.
             }
             $pdo->exec("USE `$dbq`");
-            foreach (array_filter(array_map('trim', explode(';', file_get_contents(__DIR__ . '/includes/schema.sql')))) as $sql) {
-                $pdo->exec($sql);
-            }
-            $pdo->beginTransaction();
-            $st = $pdo->prepare('INSERT INTO admins (username, password_hash) VALUES (?, ?) ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)');
-            $st->execute([$v['admin_user'], password_hash($pass, PASSWORD_DEFAULT)]);
-            $st = $pdo->prepare('INSERT INTO settings (k, v) VALUES (?, ?) ON DUPLICATE KEY UPDATE v = VALUES(v)');
-            $st->execute(['shop_name', trim($v['shop_name']) ?: 'AuryaDeco']);
-            $st->execute(['db_version', '2']);
-
-            if ($v['seed'] && (int)$pdo->query('SELECT COUNT(*) FROM products')->fetchColumn() === 0) {
-                $seed = require __DIR__ . '/includes/seed.php';
-                $ip = $pdo->prepare('INSERT INTO products (slug, kind, name, type, shape, mat, color, open_min, open_max, tomb, featured, description, position) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)');
-                $iv = $pdo->prepare('INSERT INTO variants (product_id, height, diameter, label, price, old_price, stock, position) VALUES (?,?,?,?,?,?,?,?)');
-                foreach ($seed as $p) {
-                    $ip->execute([$p['slug'], $p['kind'], $p['name'], $p['type'], $p['shape'], $p['mat'], $p['color'], $p['open_min'], $p['open_max'], $p['tomb'], $p['featured'], $p['description'], $p['position']]);
-                    $pid = (int)$pdo->lastInsertId();
-                    foreach ($p['variants'] as $i => $var) {
-                        $iv->execute([$pid, $var['height'], $var['diameter'], $var['label'], $var['price'], $var['old_price'], $var['stock'], $i]);
-                    }
-                }
-            }
-            $pdo->commit();
+            install_shop($pdo, $v['admin_user'], $pass, $v['shop_name'], (bool)$v['seed']);
 
             $config = [
                 'db_host' => $v['db_host'],
