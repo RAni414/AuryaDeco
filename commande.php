@@ -18,7 +18,7 @@ if (is_post()) {
     if (strlen($digits) < 8 || strlen($digits) > 15) $errors[] = 'Le numéro de téléphone doit contenir au moins 8 chiffres.';
     if (!in_array($f['gov'], GOVERNORATES, true)) $errors[] = 'Choisissez votre gouvernorat.';
     if ($f['ville'] === '') $errors[] = 'Indiquez votre ville.';
-    if ($f['adr'] === '') $errors[] = 'Indiquez votre adresse de livraison.';
+    
     if (!empty($_POST['website'])) $errors[] = 'Envoi refusé.'; // piège anti-robots
 
     if (!$errors) {
@@ -97,7 +97,7 @@ require __DIR__ . '/includes/header.php';
         <label class="field">Gouvernorat<select name="gov" required><option value="">Choisir</option><?php foreach (GOVERNORATES as $g): ?><option <?= $f['gov'] === $g ? 'selected' : '' ?>><?= e($g) ?></option><?php endforeach; ?></select></label>
         <label class="field">Ville<input name="ville" required value="<?= e($f['ville']) ?>"></label>
       </div>
-      <label class="field">Adresse de livraison<input name="adr" required autocomplete="street-address" value="<?= e($f['adr']) ?>"></label>
+      
       <label class="field">Remarque (facultatif)<textarea name="note" placeholder="Étage, horaires de livraison, choix de couleur…"><?= e($f['note']) ?></textarea></label>
       <div class="hp" aria-hidden="true"><label>Ne pas remplir<input name="website" tabindex="-1" autocomplete="off"></label></div>
       <div class="card" style="padding:14px 16px"><strong>Paiement à la livraison</strong><div class="muted" style="font-size:14.5px">Vous réglez en espèces à la réception de votre commande.</div></div>
