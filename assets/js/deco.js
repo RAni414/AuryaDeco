@@ -10,11 +10,6 @@
   var simulationEnabled = false, simURLs = [], recommendations = panel.querySelector('.deco-recommendations');
   function element(tag, text, className) { var node = document.createElement(tag); if (text) node.textContent = text; if (className) node.className = className; return node; }
   function step(number) { panel.querySelectorAll('[data-deco-step]').forEach(function (node) { node.hidden = node.dataset.decoStep !== String(number); }); }
-  panel.querySelector('[data-deco-next]').addEventListener('click', function () {
-    if (!form.elements.room.reportValidity() || !form.elements.style.reportValidity() || !form.elements.budget.reportValidity()) return;
-    step(2); select.focus();
-  });
-  panel.querySelector('[data-deco-back]').addEventListener('click', function () { step(1); form.elements.room.focus(); });
   launch.hidden = false;
   function message(who, text) {
     var box = document.createElement('div'); box.className = 'deco-message' + (who === 'Vous' ? ' deco-message--user' : '');
@@ -53,9 +48,9 @@
         log.replaceChildren();
         (data.messages || []).forEach(function (item) { message(item.role === 'user' ? 'Vous' : (item.demo ? 'Aurya · démonstration' : 'Aurya'), item.text); });
         var needs = data.needs || {};
-        ['room', 'style', 'dimensions', 'selection'].forEach(function (key) { if (needs[key]) form.elements[key].value = needs[key]; });
-        if (needs.budget_tnd) form.elements.budget.value = needs.budget_tnd;
-        if (needs.max_height_cm) form.elements.max_height.value = needs.max_height_cm;
+
+
+
         if (data.messages && data.messages.length) step(2);
       } else select.value = previous;
       renderCards(data.cards || []);
@@ -71,7 +66,9 @@
   });
   panel.querySelector('[data-deco-close]').addEventListener('click', close);
   panel.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.preventDefault(); close(); } });
+  var photoRevision = 0, preparingPhoto = false;
   function removePhoto() {
+    photoRevision++; preparingPhoto = false;
     clearSimulations();
     if (objectURL) URL.revokeObjectURL(objectURL);
     photo = null; objectURL = null; fileInput.value = ''; camera.value = ''; preview.hidden = true;
@@ -82,20 +79,48 @@
   panel.querySelector('[data-deco-camera]').addEventListener('click', function () { camera.click(); });
   panel.querySelector('[data-deco-remove]').addEventListener('click', removePhoto);
   panel.querySelector('[data-deco-replace]').addEventListener('click', function () { fileInput.click(); });
-  function choose(input) {
+  async function choose(input) {
     var file = input.files[0]; if (!file) return;
-    removePhoto(); status.textContent = '';
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
-      status.textContent = 'Choisissez un JPEG, PNG ou WebP de moins de 5 Mo.'; return;
+    removePhoto(); var revision = photoRevision;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 25 * 1024 * 1024) {
+      status.textContent = 'Choisissez un JPEG, PNG ou WebP de moins de 25 Mo.'; return;
     }
-    photo = file; objectURL = URL.createObjectURL(file);
-    preview.querySelector('img').src = objectURL; preview.hidden = false;
+    preparingPhoto = true; status.textContent = 'Preparation de la photo sur votre appareil...';
+    var source = URL.createObjectURL(file);
+    try {
+      var image = await new Promise(function (resolve, reject) {
+        var img = new Image(); img.onload = function () { resolve(img); }; img.onerror = reject; img.src = source;
+      });
+      if (image.naturalWidth < 100 || image.naturalHeight < 100) throw new Error('Photo trop petite : 100 pixels minimum par cote.');
+      var scale = Math.min(1, 1600 / Math.max(image.naturalWidth, image.naturalHeight));
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.round(image.naturalWidth * scale); canvas.height = Math.round(image.naturalHeight * scale);
+      var context = canvas.getContext('2d');
+      if (!context) throw new Error('Impossible de preparer cette photo. Essayez une autre image.');
+      context.fillStyle = '#ffffff'; context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      var blob = await new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.85); });
+      if (!blob || blob.size > 5 * 1024 * 1024) throw new Error('Impossible de compresser la photo sous 5 Mo.');
+      if (revision !== photoRevision) return;
+      photo = new File([blob], 'piece.jpg', {type: 'image/jpeg'});
+      objectURL = URL.createObjectURL(photo);
+      preview.querySelector('img').src = objectURL; preview.hidden = false;
+      status.textContent = 'Photo prete. Elle sera envoyee uniquement apres votre accord.';
+    } catch (error) {
+      if (revision === photoRevision) status.textContent = error.message || 'Photo illisible. Essayez un JPEG, PNG ou WebP.';
+    } finally {
+      URL.revokeObjectURL(source);
+      if (revision === photoRevision) preparingPhoto = false;
+    }
   }
   fileInput.addEventListener('change', function () { choose(fileInput); });
   camera.addEventListener('change', function () { choose(camera); });
   form.addEventListener('submit', async function (event) {
-    event.preventDefault(); if (busy || demo || !loaded || !form.reportValidity()) return;
-    var text = form.elements.message.value.trim(); if (!text) return;
+    event.preventDefault(); if (preparingPhoto) { status.textContent = 'Patientez pendant la preparation de la photo.'; return; }
+    if (busy || demo || !loaded || !form.reportValidity()) return;
+    var text = form.elements.message.value.trim();
+    if (!text && photo) text = 'O\u00f9 placer une plante dans cette pi\u00e8ce ?';
+    if (!text) { status.textContent = 'Ecrivez un message ou ajoutez une photo.'; return; }
     var selected = select.value.split(':'), body = new FormData();
     body.set('csrf', csrf); body.set('plant', selected[0]); body.set('variant', selected[1] || '');
     body.set('kind', 'artificielle'); body.set('message', text);
