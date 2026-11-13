@@ -42,6 +42,7 @@ foreach ($promises as [$d, $a, $b]): ?>
   <?= product_grid($featured, 'Les produits apparaîtront ici dès que vous les aurez ajoutés depuis l\'administration.') ?>
 </div></section>
 
+<?php require __DIR__ . '/includes/home-pots.php'; ?>
 <?php if ($reviews): $nr = count($reviews); ?>
 <section class="reviews-band" id="avis" aria-labelledby="avisTitle"><div class="wrap">
   <div class="rhead">

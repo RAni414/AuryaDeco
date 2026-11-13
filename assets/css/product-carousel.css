@@ -18,5 +18,13 @@
 .product-carousel button:focus-visible,.product-track:focus-visible{outline:3px solid #a78342;outline-offset:2px}
 .product-carousel-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(max-width:1023px){.product-carousel{--product-visible:2}.product-track>.pcard{flex-basis:calc((100% - 20px)/2)}}
-@media(max-width:639px){.product-carousel{--product-visible:1}.product-carousel-row{gap:5px}.product-track{gap:12px}.product-track>.pcard{flex-basis:100%}.product-arrow{flex-basis:36px;width:36px;height:44px;font-size:20px}}
+@media(max-width:639px){
+  .product-carousel{--product-visible:2}
+  .product-carousel-row{position:relative;gap:0}
+  .product-track{gap:10px}
+  .product-track>.pcard{flex-basis:calc((100% - 10px)/2)}
+  .product-arrow{position:absolute;top:35%;z-index:5;width:32px;height:44px;font-size:20px;background:#fffefaed;box-shadow:0 2px 10px #29473515}
+  .product-arrow[data-product-prev]{left:-12px}
+  .product-arrow[data-product-next]{right:-12px}
+}
 @media(prefers-reduced-motion:reduce){.product-track{scroll-behavior:auto}}

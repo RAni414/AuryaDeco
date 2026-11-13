@@ -45,7 +45,12 @@
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .pcard{border-radius:17px;min-width:0;box-shadow:0 4px 18px #29473505}.pcard .body{padding:12px 10px;gap:5px}.pcard h3{font-size:14px;line-height:1.35;overflow-wrap:anywhere}.pcard .kind{font-size:10px}.pcard .sizes{font-size:11px}.pcard .price{font-size:14px;padding-top:6px}
   .card-gallery .card-photo{padding:4px}.card-actions{right:5px;top:5px;gap:4px}.card-actions button,.card-actions .fav-toggle{width:44px;height:44px;padding:11px;background:#fffefaeb;box-shadow:none}.tagx{top:9px;left:7px;font-size:10px;padding:3px 6px;max-width:calc(100% - 58px)}
-  .product-track .pcard .body{padding:16px;min-height:140px}.product-track .pcard h3{font-size:18px}.product-track .pcard .price{font-size:19px}.product-track .pcard .kind,.product-track .pcard .sizes{font-size:12px}
+  .aurya-home .product-track .pcard{border-radius:4px;background:#fff;box-shadow:0 2px 8px #2947350a}
+  .product-track .pcard .body{padding:10px 8px 12px;min-height:108px;text-align:center;gap:6px}
+  .product-track .pcard h3{font-size:14px;line-height:1.35;min-height:2.7em}
+  .product-track .pcard .price{font-size:14px;color:var(--sage);padding-top:4px}
+  .product-track .pcard .kind,.product-track .pcard .sizes{font-size:10px}
+  .product-track .card-gallery .card-photo{padding:0}
   .filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;background:#eeeee5;padding:14px;border-radius:17px}.filters label{min-width:0}.filters select{width:100%;min-width:0;min-height:44px;padding:10px 8px}.filters .count{grid-column:1/-1;margin:0;padding:0;font-size:12px}.ptitle{font-size:32px;margin:18px 0 12px}
   .pp{gap:20px}.pp .media{border-radius:20px}.pp .media .ph{object-fit:contain}.pp h1{font-size:32px;line-height:1.15}.pp .pprice{font-size:26px}.buy{gap:12px}.buy .btn{min-height:50px;border-radius:13px;width:100%;flex-basis:100%}.thumbs button{width:60px;height:60px}.specs>div{gap:8px}.pp .note{font-size:13px}
   .aurya-home .pairing{padding:22px 18px;border-radius:20px}.pairing table{display:block;overflow-x:auto;max-width:100%;font-size:12px}.pairing h2{font-size:27px}

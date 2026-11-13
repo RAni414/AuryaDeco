@@ -24,7 +24,4 @@ $heroPosterUrl = $heroPoster ? url('assets/images/hero-deco-poster.jpg') . '?v='
       <a class="btn home-hero__secondary" href="<?= e(url('boutique.php?cat=pot')) ?>">Explorer les pots</a>
     </div>
   </div>
-  <?php if ($heroVideo): ?>
-    <button class="home-hero__toggle" type="button" data-video-toggle hidden aria-label="Lire la vidéo">Lire la vidéo</button>
-  <?php endif; ?>
 </section>

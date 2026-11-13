@@ -68,6 +68,8 @@ function admin_header(string $title, string $active = ''): void
         'index' => ['admin/index.php', 'Tableau de bord'],
         'commandes' => ['admin/commandes.php', 'Commandes' . ($new ? ' <span class="pill">' . $new . '</span>' : '')],
         'produits' => ['admin/produits.php', 'Produits'],
+        'accessoires' => ['admin/accessoires.php', 'Accessoires déco'],
+        'collection' => ['admin/collection.php', 'Nouvelle collection'],
         'avis' => ['admin/avis.php', 'Avis clients'],
         'reglages' => ['admin/reglages.php', 'Réglages'],
         'compte' => ['admin/compte.php', 'Mon compte'],

@@ -68,6 +68,6 @@ $mobileLinks = [
 <script src="<?= e(url('assets/js/favorites.js')) ?>?v=1" data-favorites-script data-endpoint="<?= e(url('includes/favorites-api.php')) ?>" data-csrf="<?= e(csrf_token()) ?>" defer></script>
 <script src="<?= e(url('assets/js/deco.js')) ?>?v=8" defer></script>
 <script src="<?= e(url('assets/js/interface.js')) ?>?v=1" defer></script>
-<?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/home.js')) ?>?v=1"></script><?php endif; ?>
+<?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/home.js')) ?>?v=2"></script><?php endif; ?>
 </body>
 </html>

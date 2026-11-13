@@ -323,7 +323,7 @@ function product_card(array $p, string $extra = ''): string
         . '<div class="card-actions"><button type="button" data-card-cart aria-label="Ajouter au panier" title="Ajouter au panier" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 3h3l3 13h11l3-9H6M9 21h.01M18 21h.01"/></svg></button><button type="button" data-card-preview aria-label="Aperçu rapide" title="Aperçu rapide" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>' . favorite_button((int)$p['id']) . '</div><div class="card-dots" aria-label="Photos du produit"></div></div>' . $tag
         . '<div class="body"><span class="kind">' . e(sub_text($p)) . '</span>'
         . '<h3><a href="' . $href . '">' . e($p['name']) . '</a></h3>'
-        . '<span class="sizes">' . e(sizes_text($p)) . '</span>'
+        . ($p['kind'] !== 'plante' ? '<span class="sizes">' . e(sizes_text($p)) . '</span>' : '')
         . '<span class="price">' . e(price_range($p)) . '</span>' . $extra . '</div></article>';
 }
 
