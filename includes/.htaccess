@@ -1,8 +1,8 @@
 # Fichiers internes : accès direct interdit...
 Require all denied
 
-# ... sauf les trois points d'entrée appelés par le navigateur
-# (page des favoris, API des favoris, API de l'assistant déco).
-<FilesMatch "^(favoris|favorites-api|deco-api)\.php$">
+# ... sauf les points d'entrée publics appelés par le navigateur
+# (favoris, API publiques, formulaire d'avis et catégories personnalisées).
+<FilesMatch "^(favoris|favorites-api|deco-api|avis|categorie)\.php$">
   Require all granted
 </FilesMatch>
