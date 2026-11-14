@@ -1,4 +1,4 @@
-<?php if (!empty($homePage)): require __DIR__ . '/review-form.php'; endif; ?>
+<?php if (!empty($homePage)): require __DIR__ . '/review-dialog.php'; endif; ?>
 </main>
 
 <footer class="site-foot">
@@ -70,5 +70,6 @@ $mobileLinks = [
 <script src="<?= e(url('assets/js/deco.js')) ?>?v=8" defer></script>
 <script src="<?= e(url('assets/js/interface.js')) ?>?v=1" defer></script>
 <?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/home.js')) ?>?v=2"></script><?php endif; ?>
+<?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/reviews.js')) ?>?v=1" defer></script><?php endif; ?>
 </body>
 </html>

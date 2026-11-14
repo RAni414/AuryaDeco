@@ -27,7 +27,7 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/product-carousel.css')) ?>?v=2"><?php endif; ?>
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/home.css')) ?>?v=6"><?php endif; ?>
 <link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=3">
-<link rel="stylesheet" href="<?= e(url('assets/css/reviews.css')) ?>?v=1">
+<link rel="stylesheet" href="<?= e(url('assets/css/reviews.css')) ?>?v=2">
 <link rel="icon" type="image/png" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
 <link rel="apple-touch-icon" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
 </head>
