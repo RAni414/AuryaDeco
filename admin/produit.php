@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/../includes/admin.php';
 require_admin();
+require_once __DIR__ . '/../includes/catalogue-categories.php';
 
 $id = (int)($_GET['id'] ?? 0);
 $copyOf = (int)($_GET['copie'] ?? 0);
@@ -16,11 +17,29 @@ if (!$p) {
     $p = ['id' => 0, 'kind' => $_GET['kind'] ?? 'plante', 'name' => '', 'type' => 'palm', 'shape' => 'cyl', 'mat' => 'ciment', 'color' => '#B6B2A9', 'open_min' => 30, 'open_max' => 40, 'tomb' => 0, 'featured' => 0, 'active' => 1, 'description' => '', 'position' => 0, 'shipping_fee' => null, 'slug' => '',
           'variants' => [['id' => 0, 'height' => 150, 'diameter' => null, 'label' => '', 'price' => '', 'old_price' => null, 'stock' => null]], 'images' => []];
 }
+$customCategories = catalogue_categories();
+$selectedCategories = [];
+if ($id || $copyOf) {
+    $categoryQuery = db()->prepare('SELECT category_id FROM product_categories WHERE product_id = ?');
+    $categoryQuery->execute([$id ?: $copyOf]);
+    $selectedCategories = array_map('intval', $categoryQuery->fetchAll(PDO::FETCH_COLUMN));
+}
 $errors = [];
 
 if (is_post()) {
     csrf_check();
     $in = $_POST;
+    $categoryInput = $in['categories'] ?? [];
+    $selectedCategories = [];
+    if (!is_array($categoryInput)) $errors[] = 'La sélection des catégories est invalide.';
+    else foreach ($categoryInput as $categoryId) {
+        if (!is_scalar($categoryId) || !ctype_digit((string)$categoryId) || !in_array((int)$categoryId, array_column($customCategories, 'id'))) {
+            $errors[] = 'Une catégorie sélectionnée est introuvable. Rechargez la page.';
+            break;
+        }
+        $selectedCategories[] = (int)$categoryId;
+    }
+    $selectedCategories = array_values(array_unique($selectedCategories));
     $kind = isset(KINDS[$in['kind'] ?? '']) ? $in['kind'] : 'plante';
     $name = trim((string)($in['name'] ?? ''));
     $p = array_merge($p, [
@@ -49,8 +68,8 @@ if (is_post()) {
         $row = [
             'id' => (int)($vin['id'][$i] ?? 0),
             'height' => $kind === 'plante' ? (int)($vin['size'][$i] ?? 0) : null,
-            'diameter' => $kind === 'pot' ? (int)($vin['size'][$i] ?? 0) : null,
-            'label' => $kind === 'acc' ? trim((string)($vin['label'][$i] ?? '')) : null,
+            'diameter' => $kind === 'pot' && (int)($vin['size'][$i] ?? 0) > 0 ? (int)$vin['size'][$i] : null,
+            'label' => $kind !== 'plante' ? trim((string)($vin['label'][$i] ?? '')) : null,
             'price' => str_replace(',', '.', trim((string)$price)),
             'old_price' => ($o = str_replace(',', '.', trim((string)($vin['old'][$i] ?? '')))) === '' ? null : $o,
             'stock' => ($s = trim((string)($vin['stock'][$i] ?? ''))) === '' ? null : (int)$s,
@@ -61,7 +80,7 @@ if (is_post()) {
         if (!is_numeric($row['price']) || (float)$row['price'] <= 0) $errors[] = "Indiquez un prix valide pour la taille $n.";
         if ($row['old_price'] !== null && !is_numeric($row['old_price'])) $errors[] = "L'ancien prix de la taille $n n'est pas un nombre.";
         if ($kind === 'plante' && $row['height'] <= 0) $errors[] = "Indiquez la hauteur de la taille $n.";
-        if ($kind === 'pot' && $row['diameter'] <= 0) $errors[] = "Indiquez le diamètre de la taille $n.";
+        if ($kind === 'pot' && $row['label'] === '') $errors[] = "Indiquez la taille du pot pour la ligne $n.";
         if ($kind === 'acc' && $row['label'] === '') $errors[] = "Indiquez le format de la ligne $n.";
         if ($row['stock'] !== null && $row['stock'] < 0) $errors[] = "Le stock de la taille $n ne peut pas être négatif.";
         $variants[] = $row;
@@ -94,6 +113,9 @@ if (is_post()) {
                 $p['id'] = (int)$pdo->lastInsertId();
                 $p['slug'] = $slug;
             }
+            $pdo->prepare('DELETE FROM product_categories WHERE product_id = ?')->execute([$p['id']]);
+            $saveCategory = $pdo->prepare('INSERT INTO product_categories (product_id, category_id) VALUES (?,?)');
+            foreach ($selectedCategories as $categoryId) $saveCategory->execute([$p['id'], $categoryId]);
             // Tailles : mise à jour, ajout, suppression
             $keep = [];
             $upd = $pdo->prepare('UPDATE variants SET height=?, diameter=?, label=?, price=?, old_price=?, stock=?, position=? WHERE id=? AND product_id=?');
@@ -154,7 +176,7 @@ if (is_post()) {
 }
 
 $k = $p['kind'];
-$sizeHead = $k === 'plante' ? 'Hauteur (cm)' : ($k === 'pot' ? "Diamètre d'ouverture (cm)" : 'Format (ex. Sac de 2 kg)');
+$sizeHead = $k === 'plante' ? 'Hauteur (cm)' : ($k === 'pot' ? 'Taille du pot (ex. H 25,5 cm - D 25,5 cm)' : 'Format (ex. Sac de 2 kg)');
 $opt = function (array $arr, $cur) { $h = ''; foreach ($arr as $kk => $l) { $h .= '<option value="' . e($kk) . '"' . ((string)$kk === (string)$cur ? ' selected' : '') . '>' . e($l) . '</option>'; } return $h; };
 admin_header($p['id'] ? 'Modifier ' . $p['name'] : 'Nouveau produit', 'produits');
 ?>
@@ -184,7 +206,10 @@ admin_header($p['id'] ? 'Modifier ' . $p['name'] : 'Nouveau produit', 'produits'
       <div class="row only-acc"><label class="field">Illustration (si pas de photo)<select name="acc_type"><?= $opt(ACC_TYPES, $k === 'acc' ? $p['type'] : 'pebbles') ?></select></label></div>
     </fieldset>
 
+    <?php require __DIR__ . '/../includes/product-categories-editor.php'; ?>
+
     <fieldset class="fs"><legend>Tailles, prix et stock</legend>
+      <p class="hint only-pot">Saisissez librement chaque taille (ex. H 25,5 cm - D 25,5 cm, Petit, Moyen, Grand), avec son prix et son stock. Elles apparaissent dans une liste déroulante sur la fiche du pot, dans l’ordre des lignes.</p>
       <p class="hint">Remplissez l'ancien prix pour afficher une promotion barrée. Laissez le stock vide pour ne pas le suivre ; à 0, la taille s'affiche « épuisée ». Le stock baisse automatiquement à chaque commande.</p>
       <div class="atable-wrap plain"><table class="vt" id="vTable">
         <thead><tr><th id="sizeHead"><?= e($sizeHead) ?></th><th>Prix (TND)</th><th>Ancien prix</th><th>Stock</th><th></th></tr></thead>
@@ -193,7 +218,7 @@ admin_header($p['id'] ? 'Modifier ' . $p['name'] : 'Nouveau produit', 'produits'
           <tr>
             <td><input type="hidden" name="v[id][]" value="<?= (int)$v['id'] ?>">
               <input class="sz-num" type="number" min="1" name="v[size][]" value="<?= e($k === 'plante' ? $v['height'] : ($k === 'pot' ? $v['diameter'] : '')) ?>" aria-label="Taille">
-              <input class="sz-txt" type="text" name="v[label][]" value="<?= e($v['label']) ?>" aria-label="Format"></td>
+              <input class="sz-txt" type="text" name="v[label][]" value="<?= e($k === 'pot' ? variant_label($p, $v) : $v['label']) ?>" maxlength="120" placeholder="<?= $k === 'pot' ? 'H 25,5 cm - D 25,5 cm' : 'Format' ?>" aria-label="Taille ou format"></td>
             <td><input type="text" inputmode="decimal" name="v[price][]" value="<?= e($v['price'] === '' ? '' : rtrim(rtrim((string)$v['price'], '0'), '.')) ?>" aria-label="Prix"></td>
             <td><input type="text" inputmode="decimal" name="v[old][]" value="<?= e($v['old_price'] === null ? '' : rtrim(rtrim((string)$v['old_price'], '0'), '.')) ?>" placeholder="facultatif" aria-label="Ancien prix"></td>
             <td><input type="number" name="v[stock][]" min="0" value="<?= e($v['stock']) ?>" placeholder="illimité" aria-label="Stock"></td>

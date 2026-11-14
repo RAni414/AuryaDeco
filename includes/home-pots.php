@@ -1,9 +1,9 @@
 <?php
-$designPots = load_products("p.active = 1 AND p.kind IN ('plante', 'pot')", [], 'p.featured DESC, p.position ASC, p.id DESC', 8);
+$designPots = load_products("p.active = 1 AND p.kind IN ('plante', 'pot')", [], 'p.position ASC, p.id DESC', 8);
 $collectionSelection = settings()['home_pot_collection_ids'] ?? null;
 if ($collectionSelection !== null) {
     $collectionIds = array_values(array_filter(array_map('intval', (array)json_decode($collectionSelection, true)), fn($id) => $id > 0));
-    $designPots = $collectionIds ? load_products("p.active = 1 AND p.kind IN ('plante', 'pot') AND p.id IN (" . implode(',', $collectionIds) . ')', [], 'p.featured DESC, p.position ASC, p.id DESC', 8) : [];
+    $designPots = $collectionIds ? load_products("p.active = 1 AND p.kind IN ('plante', 'pot') AND p.id IN (" . implode(',', $collectionIds) . ')', [], 'FIELD(p.id,' . implode(',', $collectionIds) . ')', 8) : [];
 }
 ?>
 <section class="home-pot-collection" aria-labelledby="pot-collection-title">

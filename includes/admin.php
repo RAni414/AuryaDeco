@@ -2,6 +2,22 @@
 /** Outils communs de l'administration. */
 require __DIR__ . '/bootstrap.php';
 
+/** Order only the selected products; each section stores its own ordered IDs. */
+function collection_ordered_ids(array $ids, array $ranks): array
+{
+    $ordered = [];
+    foreach ($ids as $id) {
+        $raw = $ranks[$id] ?? null;
+        $rank = is_scalar($raw) ? filter_var($raw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 8]]) : false;
+        if ($rank === false || isset($ordered[$rank])) {
+            throw new InvalidArgumentException('Donnez à chaque produit coché un ordre différent, de 1 à 8.');
+        }
+        $ordered[$rank] = (int)$id;
+    }
+    ksort($ordered, SORT_NUMERIC);
+    return array_values($ordered);
+}
+
 function current_admin(): ?array
 {
     if (empty($_SESSION['admin_id'])) {
@@ -68,6 +84,7 @@ function admin_header(string $title, string $active = ''): void
         'index' => ['admin/index.php', 'Tableau de bord'],
         'commandes' => ['admin/commandes.php', 'Commandes' . ($new ? ' <span class="pill">' . $new . '</span>' : '')],
         'produits' => ['admin/produits.php', 'Produits'],
+        'categories' => ['admin/categories.php', 'Catégories et menu'],
         'accessoires' => ['admin/accessoires.php', 'Accessoires déco'],
         'collection' => ['admin/collection.php', 'Nouvelle collection'],
         'avis' => ['admin/avis.php', 'Avis clients'],
@@ -85,7 +102,7 @@ function admin_header(string $title, string $active = ''): void
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(url('assets/css/style.css')) ?>?v=1">
-<link rel="stylesheet" href="<?= e(url('assets/css/admin.css')) ?>?v=1">
+<link rel="stylesheet" href="<?= e(url('assets/css/admin.css')) ?>?v=2">
 </head>
 <body class="admin-body">
 <header class="abar">
@@ -112,7 +129,7 @@ function admin_footer(): void
     ?>
 </main>
 <script src="<?= e(url('assets/js/art.js')) ?>?v=1"></script>
-<script src="<?= e(url('assets/js/admin.js')) ?>?v=3"></script>
+<script src="<?= e(url('assets/js/admin.js')) ?>?v=4"></script>
 </body>
 </html>
 <?php

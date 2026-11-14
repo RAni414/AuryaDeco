@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Version 2 : frais de livraison par produit + avis clients.
  * Les produits, commandes et photos existants ne sont pas touchés.
  */
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 function run_migrations(PDO $pdo): void
 {
@@ -42,6 +42,24 @@ function run_migrations(PDO $pdo): void
           ip_hash CHAR(64) NOT NULL PRIMARY KEY,
           fails INT UNSIGNED NOT NULL DEFAULT 0,
           last_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+    if ($cur < 4) {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS catalogue_categories (
+          id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(80) NOT NULL,
+          parent_key VARCHAR(40) NULL,
+          position INT NOT NULL DEFAULT 1,
+          active TINYINT(1) NOT NULL DEFAULT 1,
+          KEY idx_parent (parent_key, position)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        $pdo->exec("CREATE TABLE IF NOT EXISTS product_categories (
+          product_id INT UNSIGNED NOT NULL,
+          category_id INT UNSIGNED NOT NULL,
+          PRIMARY KEY (product_id, category_id),
+          KEY idx_category (category_id),
+          CONSTRAINT fk_pc_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+          CONSTRAINT fk_pc_category FOREIGN KEY (category_id) REFERENCES catalogue_categories(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
     $pdo->prepare("INSERT INTO settings (k, v) VALUES ('db_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)")->execute([(string)DB_VERSION]);

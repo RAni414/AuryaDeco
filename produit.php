@@ -62,18 +62,8 @@ require __DIR__ . '/includes/header.php';
         <input type="hidden" name="action" value="add">
         <div class="pprice"><span id="price"><?= e(money($v['price'])) ?></span> <s class="muted old" id="oldPrice"<?= ($v['old_price'] !== null && (float)$v['old_price'] > (float)$v['price']) ? '' : ' hidden' ?>><?= $v['old_price'] !== null ? e(money($v['old_price'])) : '' ?></s></div>
         <p class="oos" id="oosMsg"<?= in_stock($v) ? ' hidden' : '' ?>>Cette taille est en rupture de stock.</p>
-        <div class="opt-label"><?= e($optLabel) ?></div>
-        <div class="opts" role="radiogroup" aria-label="<?= e($optLabel) ?>">
-          <?php foreach ($p['variants'] as $i => $x): $ok = in_stock($x); ?>
-            <label class="opt<?= $ok ? '' : ' out' ?>">
-              <input type="radio" name="variant_id" value="<?= (int)$x['id'] ?>" <?= $i === $sel ? 'checked' : '' ?>
-                data-price="<?= e(money($x['price'])) ?>"
-                data-old="<?= ($x['old_price'] !== null && (float)$x['old_price'] > (float)$x['price']) ? e(money($x['old_price'])) : '' ?>"
-                data-instock="<?= $ok ? '1' : '0' ?>">
-              <span><?= e(variant_label($p, $x)) ?><?= $ok ? '' : ' (épuisé)' ?></span>
-            </label>
-          <?php endforeach; ?>
-        </div>
+        <?php require __DIR__ . '/includes/product-options.php'; ?>
+        
         <div class="buy">
           <div class="qty"><button type="button" data-step="-1" aria-label="Diminuer la quantité">−</button><input type="number" name="qty" value="1" min="1" max="99" aria-label="Quantité"><button type="button" data-step="1" aria-label="Augmenter la quantité">+</button></div>
           <button class="btn" id="addBtn" type="submit"<?= in_stock($v) ? '' : ' disabled' ?>><?= in_stock($v) ? 'Ajouter au panier' : 'Rupture de stock' ?></button>
@@ -92,7 +82,7 @@ require __DIR__ . '/includes/header.php';
           <div><dt>Livrée dans</dt><dd>Pot de culture noir</dd></div>
           <div><dt>Entretien</dt><dd>Un coup de chiffon de temps en temps</dd></div>
         <?php elseif ($p['kind'] === 'pot'): ?>
-          <div><dt>Diamètres d'ouverture</dt><dd><?= e(sizes_text($p)) ?></dd></div>
+          <div><dt>Tailles disponibles</dt><dd><?= e(sizes_text($p)) ?></dd></div>
           <div><dt>Matière</dt><dd><?= e(MATS[$p['mat']] ?? '') ?></dd></div>
         <?php else: ?>
           <div><dt>Format</dt><dd><?= e(sizes_text($p)) ?></dd></div>

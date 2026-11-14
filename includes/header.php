@@ -25,8 +25,9 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <link rel="stylesheet" href="<?= e(url('assets/css/favorites.css')) ?>?v=1">
 <link rel="stylesheet" href="<?= e(url('assets/css/product-cards.css')) ?>?v=2">
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/product-carousel.css')) ?>?v=2"><?php endif; ?>
-<?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/home.css')) ?>?v=4"><?php endif; ?>
+<?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/home.css')) ?>?v=6"><?php endif; ?>
 <link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=3">
+<link rel="stylesheet" href="<?= e(url('assets/css/reviews.css')) ?>?v=1">
 <link rel="icon" type="image/png" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
 <link rel="apple-touch-icon" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
 </head>
@@ -67,26 +68,7 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
     </form>
   </div>
   <nav class="main" id="mainNav" aria-label="Catégories">
-    <ul>
-      <li><a href="<?= e(url('boutique.php?cat=plante')) ?>">Plantes artificielles</a>
-        <ul class="drop">
-          <?php foreach (BANDS as $k => $l): ?>
-            <li><a href="<?= e(url('boutique.php?cat=plante&taille=' . $k)) ?>"><?= e($l) ?> <small><?= e(BAND_HINT[$k]) ?></small></a></li>
-          <?php endforeach; ?>
-        </ul>
-      </li>
-      <li><a href="<?= e(url('boutique.php?cat=pot')) ?>">Pots</a>
-        <ul class="drop">
-          <?php foreach (MATS as $k => $l): ?>
-            <li><a href="<?= e(url('boutique.php?cat=pot&mat=' . $k)) ?>"><?= e($l) ?></a></li>
-          <?php endforeach; ?>
-        </ul>
-      </li>
-      <li><a href="<?= e(url('boutique.php?cat=acc')) ?>">Accessoires</a></li>
-      <li><a href="<?= e(url('boutique.php')) ?>">Toute la boutique</a></li>
-      <li><a href="<?= e(url('page.php?p=pro')) ?>">Professionnels</a></li>
-      <li><a class="outlet" href="<?= e(url('boutique.php?promo=1')) ?>">Promotions</a></li>
-    </ul>
+    <?php require __DIR__ . '/navigation-menu.php'; ?>
   </nav>
 </header>
 

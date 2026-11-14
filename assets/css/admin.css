@@ -75,7 +75,7 @@ form.fs legend{float:left;width:100%;padding:0;margin-bottom:4px}
 .vt th{text-align:left;font-size:13px;color:var(--muted);font-weight:600;padding:4px 6px}
 .vt td{padding:4px 6px}
 .vt input{width:100%;min-width:70px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px}
-.editor[data-kind="acc"] .sz-num,.editor:not([data-kind="acc"]) .sz-txt{display:none}
+.editor:not([data-kind="plante"]) .sz-num,.editor[data-kind="plante"] .sz-txt{display:none}
 .editor:not([data-kind="plante"]) .only-plante,.editor:not([data-kind="pot"]) .only-pot,.editor:not([data-kind="acc"]) .only-acc{display:none}
 .photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
 .photo{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}

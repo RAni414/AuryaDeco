@@ -202,9 +202,13 @@ function variant_label(array $p, array $v): string
         return 'H ' . (int)$v['height'] . ' cm';
     }
     if ($p['kind'] === 'pot') {
-        return 'Ø ' . (int)$v['diameter'] . ' cm';
+        return trim((string)($v['label'] ?? '')) ?: ('D ' . (int)$v['diameter'] . ' cm');
     }
-    return (string)$v['label'];
+    $label = trim((string)$v['label']);
+    if (($p['type'] ?? '') === 'pebbles' && preg_match('/^(\d+(?:[.,]\d+)?)\s*(?:kg)?$/i', $label, $weight)) {
+        return $weight[1] . ' KG';
+    }
+    return $label;
 }
 
 function in_stock(array $v): bool
@@ -253,6 +257,8 @@ function price_range(array $p): string
 
 function sizes_text(array $p): string
 {
+    if ($p['kind'] === 'acc') return implode(' / ', array_map(fn($v) => variant_label($p, $v), $p['variants']));
+    if ($p['kind'] === 'pot') return implode(' / ', array_map(fn($v) => variant_label($p, $v), $p['variants']));
     $vals = [];
     foreach ($p['variants'] as $v) {
         $vals[] = $p['kind'] === 'plante' ? (int)$v['height'] : ($p['kind'] === 'pot' ? (int)$v['diameter'] : $v['label']);

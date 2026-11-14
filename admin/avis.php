@@ -35,6 +35,7 @@ $shown = count(array_filter($list, fn($r) => $r['active']));
 admin_header('Avis clients', 'avis');
 ?>
 <div class="shead"><h1>Avis clients</h1><a class="btn" href="<?= e(url('admin/avi.php')) ?>">Ajouter un avis</a></div>
+<p class="hint">Les avis envoyés par les clients attendent votre validation. Cliquez sur « Publier » pour les afficher, « Masquer » pour les retirer du site ou « Supprimer » pour les effacer.</p>
 <p class="hint"><?= count($list) ?> avis, dont <?= $shown ?> affiché<?= $shown > 1 ? 's' : '' ?> dans le carrousel de la page d'accueil, dans l'ordre de cette liste (jusqu'à 9). Utilisez les flèches pour les ordonner. Un avis avec photo s'affiche en carte blanche, un avis sans photo en carte verte.</p>
 
 <?php if (!$list): ?>
@@ -49,7 +50,7 @@ admin_header('Avis clients', 'avis');
       <td><a class="nm" href="<?= e(url('admin/avi.php?id=' . $r['id'])) ?>"><?= e($r['name']) ?></a><div class="sub"><?= e($r['city']) ?></div></td>
       <td><?= stars_html((int)$r['rating']) ?></td>
       <td class="clip"><?= e(mb_strlen($r['comment']) > 110 ? mb_substr($r['comment'], 0, 110) . '…' : $r['comment']) ?></td>
-      <td><form method="post"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $r['id'] ?>"><button class="sbtn" name="action" value="active"><?= $r['active'] ? 'Visible' : 'Masqué' ?></button></form></td>
+      <td><form method="post"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $r['id'] ?>"><button class="sbtn" name="action" value="active"><?= $r['active'] ? 'Masquer' : 'Publier' ?></button></form></td>
       <td class="r"><div class="acts">
         <form method="post"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $r['id'] ?>"><button class="sbtn" name="action" value="up" aria-label="Monter" <?= $i === 0 ? 'disabled' : '' ?>>↑</button></form>
         <form method="post"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $r['id'] ?>"><button class="sbtn" name="action" value="down" aria-label="Descendre" <?= $i === count($list) - 1 ? 'disabled' : '' ?>>↓</button></form>

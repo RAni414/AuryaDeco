@@ -28,7 +28,7 @@
         oos = document.getElementById('oosMsg'), add = document.getElementById('addBtn');
     form.addEventListener('change', function (e) {
       if (e.target.name !== 'variant_id') return;
-      var r = e.target;
+      var r = e.target.tagName === 'SELECT' ? e.target.selectedOptions[0] : e.target;
       price.textContent = r.dataset.price;
       old.textContent = r.dataset.old; old.hidden = !r.dataset.old;
       var ok = r.dataset.instock === '1';

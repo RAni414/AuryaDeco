@@ -10,7 +10,7 @@
 
   // Catégorie : affiche les bons champs
   var kind = document.getElementById('kindSel'), head = document.getElementById('sizeHead');
-  var heads = { plante: 'Hauteur (cm)', pot: "Diamètre d'ouverture (cm)", acc: 'Format (ex. Sac de 2 kg)' };
+  var heads = { plante: 'Hauteur (cm)', pot: 'Taille du pot (ex. H 25,5 cm - D 25,5 cm)', acc: 'Format (ex. Sac de 2 kg)' };
   kind.addEventListener('change', function () {
     form.dataset.kind = kind.value;
     head.textContent = heads[kind.value];
@@ -24,7 +24,7 @@
     row.querySelectorAll('input').forEach(function (i) { i.value = ''; });
     row.querySelector('input[name="v[id][]"]').value = '0';
     tbody.appendChild(row);
-    row.querySelector(form.dataset.kind === 'acc' ? '.sz-txt' : '.sz-num').focus();
+    row.querySelector(form.dataset.kind === 'plante' ? '.sz-num' : '.sz-txt').focus();
     syncRemove();
   });
   tbody.addEventListener('click', function (e) {
