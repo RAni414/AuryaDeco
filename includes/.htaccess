@@ -3,6 +3,6 @@ Require all denied
 
 # ... sauf les points d'entrée publics appelés par le navigateur
 # (favoris, API publiques, formulaire d'avis et catégories personnalisées).
-<FilesMatch "^(favoris|favorites-api|deco-api|avis|categorie|sitemap|robots)\.php$">
+<FilesMatch "^(favoris|favorites-api|deco-api|avis|categorie|sitemap|robots|compte)\.php$">
   Require all granted
 </FilesMatch>

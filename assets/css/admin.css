@@ -102,3 +102,12 @@ form.fs legend{float:left;width:100%;padding:0;margin-bottom:4px}
 .shead a.sbtn{color:var(--ink);font-weight:400}
 .anav a,.anav .linkbtn{padding:8px 9px;font-size:14px;white-space:nowrap}
 .abar-in{gap:10px 18px}
+.color-manager__tabs{margin:20px 0;display:flex;gap:8px;flex-wrap:wrap}
+.color-manager__tabs .sbtn{display:inline-flex;align-items:center;gap:8px}
+.color-manager__dot{display:inline-block;width:18px;height:18px;border:1px solid #0002;border-radius:50%;flex-shrink:0}
+.color-manager__preview{display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border:1px solid var(--line);border-radius:12px;margin:0 0 24px}
+.color-manager__preview>span{width:36px;height:36px;border:1px solid #0002;border-radius:50%}
+.color-manager__sizes{padding:24px 0;margin:16px 0;border-top:1px solid var(--line);scroll-margin-top:120px}
+.color-manager__sizes input:not([type=checkbox]):not([type=hidden]){min-width:95px;max-width:220px;width:100%;box-sizing:border-box}
+.color-manager__sizes tr:has(input[type=checkbox]:checked){opacity:.55;background:var(--bg)}
+.color-manager .photo:has(input[type=checkbox]:checked) img{opacity:.35}

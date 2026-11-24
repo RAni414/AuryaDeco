@@ -1,27 +1,48 @@
 (function () {
-  // Menu mobile
+  // Mobile drawer: categories and customer links, with keyboard navigation.
   var btn = document.getElementById('menuBtn'), nav = document.getElementById('mainNav');
-  if (btn && nav) btn.addEventListener('click', function () {
-    var open = nav.classList.toggle('open');
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  var drawerBackdrop = document.querySelector('[data-drawer-backdrop]');
+  var menuViewport = window.matchMedia('(max-width:860px)');
+  function setMenuOpen(open, returnFocus) {
+    if (!btn || !nav) return;
+    open = open && menuViewport.matches;
+    nav.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', String(open));
     btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
-  });
-  if (btn && nav) nav.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { nav.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', 'Ouvrir le menu'); btn.focus(); }
-  });
-
-  if (btn && nav) {
-    function closeMenu() {
-      nav.classList.remove('open');
-      btn.setAttribute('aria-expanded', 'false');
-      btn.setAttribute('aria-label', 'Ouvrir le menu');
+    if (drawerBackdrop) drawerBackdrop.hidden = !open;
+    if (open) {
+      nav.setAttribute('role', 'dialog'); nav.setAttribute('aria-modal', 'true');
+      var close = nav.querySelector('[data-drawer-close]');
+      if (close) close.focus();
+    } else {
+      nav.removeAttribute('role'); nav.removeAttribute('aria-modal');
+      if (returnFocus) btn.focus();
     }
-    document.addEventListener('pointerdown', function (event) {
-      if (!nav.contains(event.target) && !btn.contains(event.target)) closeMenu();
+  }
+  if (btn && nav) {
+    btn.addEventListener('click', function () { setMenuOpen(!nav.classList.contains('open'), false); });
+    var drawerClose = nav.querySelector('[data-drawer-close]');
+    if (drawerClose) drawerClose.addEventListener('click', function () { setMenuOpen(false, true); });
+    if (drawerBackdrop) drawerBackdrop.addEventListener('click', function () { setMenuOpen(false, true); });
+    nav.querySelectorAll('[data-drawer-tab]').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        nav.dataset.activePanel = tab.dataset.drawerTab;
+        nav.querySelectorAll('[data-drawer-tab]').forEach(function (item) { item.setAttribute('aria-pressed', String(item === tab)); });
+      });
     });
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && nav.classList.contains('open')) { closeMenu(); btn.focus(); }
+      if (!nav.classList.contains('open')) return;
+      if (event.key === 'Escape') { setMenuOpen(false, true); return; }
+      if (event.key !== 'Tab') return;
+      var focusable = Array.from(nav.querySelectorAll('a[href],button:not([disabled]),input:not([disabled])')).filter(function (item) { return item.offsetParent !== null; });
+      if (!focusable.length) return;
+      var first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
+    function resetMenu() { if (!menuViewport.matches) setMenuOpen(false, false); }
+    if (menuViewport.addEventListener) menuViewport.addEventListener('change', resetMenu);
+    else menuViewport.addListener(resetMenu);
   }
 
   // Compact header search, controlled by the inline magnifying glass.
@@ -35,6 +56,7 @@
       if (open) mobileSearch.querySelector('input[type="search"]').focus();
     }
     searchToggle.addEventListener('click', function () {
+      setMenuOpen(false, false);
       setSearchOpen(searchToggle.getAttribute('aria-expanded') !== 'true');
     });
     mobileSearch.addEventListener('keydown', function (event) {
@@ -62,9 +84,19 @@
     form.addEventListener('change', function (e) {
       if (e.target.name !== 'variant_id') return;
       var r = e.target.tagName === 'SELECT' ? e.target.selectedOptions[0] : e.target;
+      if (!r) {
+        price.textContent = 'Indisponible';
+        old.hidden = true;
+        oos.hidden = false;
+        oos.textContent = 'Aucune taille disponible pour cette couleur.';
+        add.disabled = true;
+        add.textContent = 'Indisponible';
+        return;
+      }
       price.textContent = r.dataset.price;
       old.textContent = r.dataset.old; old.hidden = !r.dataset.old;
       var ok = r.dataset.instock === '1';
+      oos.textContent = 'Cette taille est en rupture de stock.';
       oos.hidden = ok; add.disabled = !ok; add.textContent = ok ? 'Ajouter au panier' : 'Rupture de stock';
     });
   }

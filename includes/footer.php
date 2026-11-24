@@ -23,6 +23,7 @@
         <li><a href="<?= e(url('page.php?p=pro')) ?>">Professionnels</a></li>
         <li><a href="<?= e(url('page.php?p=contact')) ?>">Contact</a></li>
         <li><a href="<?= e(url('page.php?p=livraison')) ?>">Livraison et retours</a></li>
+        <li><a href="<?= e(url('includes/compte.php')) ?>">Mon compte</a></li>
         <li><a href="<?= e(url('panier.php')) ?>">Mon panier</a></li>
       </ul>
     </div>
@@ -46,6 +47,7 @@
 <a class="wa-float" href="<?= e(wa_link('Bonjour ' . setting('shop_name') . ', ')) ?>" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.4-.2z"/></svg></a>
 
 <?php endif; ?>
+<button class="mobile-help-toggle" type="button" data-mobile-help aria-label="Afficher les moyens de contact" aria-expanded="false">?</button>
 </div>
 <?php
 $mobilePage = basename($_SERVER['SCRIPT_NAME'] ?? 'index.php');
@@ -61,8 +63,9 @@ $mobileLinks = [
   <a href="<?= e(url($path)) ?>"<?= $mobilePage === basename($path) ? ' aria-current="page"' : '' ?>><span class="mobile-dock-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="<?= e($icon) ?>"/></svg><?php if ($label === 'Panier'): ?><span class="badge" data-n="<?= cart_count() ?>"><?= cart_count() ?></span><?php elseif ($label === 'Favoris'): ?><span class="fav-count" data-favorites-count hidden>0</span><?php endif; ?></span><span><?= e($label) ?></span></a>
 <?php endforeach; ?>
 </nav>
+<?php require __DIR__ . '/mobile-purchase.php'; ?>
 <script src="<?= e(url('assets/js/art.js')) ?>?v=1"></script>
-<script src="<?= e(url('assets/js/shop.js')) ?>?v=4"></script>
+<script src="<?= e(url('assets/js/shop.js')) ?>?v=6"></script>
 <script src="<?= e(url('assets/js/product-cards.js')) ?>?v=3" data-card-script data-cart="<?= e(url('panier.php')) ?>" data-csrf="<?= e(csrf_token()) ?>" defer></script>
 <?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/product-carousel.js')) ?>?v=1" defer></script><?php endif; ?>
 <div class="fav-notice" role="status" aria-live="polite" data-favorites-notice hidden></div>
@@ -71,6 +74,7 @@ $mobileLinks = [
 <script src="<?= e(url('assets/js/interface.js')) ?>?v=1" defer></script>
 <?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/home.js')) ?>?v=2"></script><?php endif; ?>
 <?php if (!empty($homePage) || basename($_SERVER['SCRIPT_NAME'] ?? '') === 'avis.php'): ?><script src="<?= e(url('assets/js/reviews.js')) ?>?v=2" defer></script><?php endif; ?>
-<script src="<?= e(url('assets/js/pot-colors.js')) ?>?v=1" defer></script>
+<script src="<?= e(url('assets/js/pot-colors.js')) ?>?v=2" defer></script>
+<script src="<?= e(url('assets/js/storefront.js')) ?>?v=1" defer></script>
 </body>
 </html>

@@ -22,6 +22,7 @@ function seo_product_schema(array $product): array
         'name' => $product['name'], 'description' => seo_text((string)$product['description'], 1000), 'sku' => (string)$product['id']];
     $images = array_map(fn($image) => seo_url('uploads/' . implode('/', array_map('rawurlencode', explode('/', $image['file'])))), $product['images']);
     if ($images) $schema['image'] = $images;
+    if (!empty($product['material_text'])) $schema['material'] = $product['material_text'];
     $variants = array_values(array_filter($product['variants'], fn($v) => (float)$v['price'] > 0));
     if (count($variants) === 1) {
         $variant = $variants[0];
@@ -73,7 +74,7 @@ function seo_metadata(string $script, array $query, ?array $product, ?array $cat
         $meta['canonical'] = seo_url('boutique.php' . ($filters ? '?' . http_build_query($filters) : ''));
         $meta['title'] = ($pageTitle ?: 'Plantes, pots et accessoires déco') . ' en Tunisie | ' . $name;
         if ($meta['description'] === '') $meta['description'] = 'Découvrez ' . mb_strtolower($pageTitle ?: 'notre collection de plantes, pots et accessoires déco') . ' chez ' . $name . '. Consultez les prix en TND et commandez avec livraison en Tunisie.';
-        if (trim((string)($query['q'] ?? '')) !== '') $meta['index'] = false;
+        foreach (['q', 'min', 'max', 'color', 'pot_size', 'usage', 'available'] as $extraFilter) if (!empty($query[$extraFilter])) $meta['index'] = false;
     } elseif ($script === 'categorie.php' && $category) {
         $meta['canonical'] = seo_url('includes/categorie.php?id=' . (int)$category['id']);
         $meta['title'] = $category['name'] . ' en Tunisie | ' . $name;

@@ -129,6 +129,8 @@ function default_settings(): array
         'about'         => 'Plantes artificielles réalistes et pots de décoration pour la maison, le bureau et les espaces professionnels.',
         'free_shipping' => '300',
         'shipping_fee'  => '8',
+        'delivery_delay' => 'Sous 48 h',
+        'returns_policy' => 'Un produit reçu cassé ou présentant un défaut ? Contactez-nous avec une photo pour bénéficier d’un remboursement.',
         'hours'         => 'Lundi au samedi, 9 h à 19 h',
     ];
 }
@@ -319,13 +321,20 @@ function favorite_button(int $id): string
         . '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg></button>';
 }
 
+function product_card_pot_options(array $p): string
+{
+    $sizes = count(array_unique(array_map('pot_size_label', $p['variants'])));
+    $colors = count(array_unique(array_filter(array_column($p['variants'], 'color_name'))));
+    return $sizes . ' taille' . ($sizes > 1 ? 's' : '') . ($colors ? ' · ' . $colors . ' couleur' . ($colors > 1 ? 's' : '') : '');
+}
+
 function product_card(array $p, string $extra = ''): string
 {
     $href = e(url('produit.php?p=' . rawurlencode($p['slug'])));
     $photos = array_map(fn($i) => url('uploads/' . $i['file']), $p['images']);
     $slides = '';
     foreach ($photos as $n => $src) {
-        $slides .= '<img class="card-photo' . ($n === 0 ? ' is-active' : '') . '" src="' . e($src) . '" alt="' . e($p['name'] . ' — photo ' . ($n + 1)) . '" loading="lazy">';
+        $slides .= '<img class="card-photo' . ($n === 0 ? ' is-active' : '') . '" src="' . e($src) . '" alt="' . e($p['name'] . ' — photo ' . ($n + 1)) . '" loading="lazy" width="720" height="720">';
     }
     $variants = array_map(fn($v) => ['id' => (int)$v['id'], 'label' => variant_label($p, $v), 'price' => money($v['price']), 'available' => in_stock($v)], $p['variants']);
     $details = ['name' => $p['name'], 'photos' => $photos, 'variants' => $variants, 'price' => price_range($p), 'href' => url('produit.php?p=' . rawurlencode($p['slug']))];
@@ -335,7 +344,7 @@ function product_card(array $p, string $extra = ''): string
         . '<div class="card-actions"><button type="button" data-card-cart aria-label="Ajouter au panier" title="Ajouter au panier" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 3h3l3 13h11l3-9H6M9 21h.01M18 21h.01"/></svg></button><button type="button" data-card-preview aria-label="Aperçu rapide" title="Aperçu rapide" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>' . favorite_button((int)$p['id']) . '</div><div class="card-dots" aria-label="Photos du produit"></div></div>' . $tag
         . '<div class="body"><span class="kind">' . e(sub_text($p)) . '</span>'
         . '<h3><a href="' . $href . '">' . e($p['name']) . '</a></h3>'
-        . ($p['kind'] !== 'plante' ? '<span class="sizes">' . e(sizes_text($p)) . '</span>' : '')
+        . ($p['kind'] !== 'plante' ? '<span class="sizes">' . e($p['kind'] === 'pot' ? product_card_pot_options($p) : sizes_text($p)) . '</span>' : '')
         . '<span class="price">' . e(price_range($p)) . '</span>' . $extra . '</div></article>';
 }
 
@@ -446,8 +455,9 @@ function stars_html(int $n): string
 
 function review_card(array $r, int $i = 1, int $n = 1): string
 {
+    require_once __DIR__ . '/review-date.php';
     $who = '<div class="rwho"><span class="avatar" aria-hidden="true">' . e(mb_strtoupper(mb_substr(trim($r['name']), 0, 1))) . '</span><span><strong>' . e($r['name']) . '</strong>'
-        . ($r['city'] ? '<small>' . e($r['city']) . '</small>' : '') . '</span></div>';
+        . ($r['city'] ? '<small>' . e($r['city']) . '</small>' : '') . review_date_html($r) . '</span></div>';
     $quote = '<blockquote>' . nl2br(e($r['comment'])) . '</blockquote>';
     $attrs = ' role="group" aria-roledescription="diapositive" aria-label="Avis ' . $i . ' sur ' . $n . '"';
     if ($r['photo']) {

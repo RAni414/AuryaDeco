@@ -57,15 +57,26 @@
     });
     var matching = options.filter(function (option) { return !option.disabled; });
     var chosen = matching.find(function (option) { return option.dataset.size === size; }) || matching.find(function (option) { return option.dataset.instock === '1'; }) || matching[0];
-    if (!chosen) return;
-    select.value = chosen.value;
+    select.disabled = !chosen;
+    if (chosen) select.value = chosen.value;
+    else select.selectedIndex = -1;
     select.dispatchEvent(new Event('change', {bubbles:true}));
     palette.querySelector('[data-pot-color-name]').textContent = colors[id].name;
     buttons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.potColor === String(id))); });
     showPhotos(colors[id]);
+    var photoNote = document.querySelector('[data-pot-photo-note]');
+    if (photoNote) {
+      photoNote.hidden = !!colors[id].photos.length || String(id) === '0';
+      photoNote.textContent = 'Photo générale du modèle. Teinte sélectionnée : ' + colors[id].name + '.';
+    }
   }
   buttons.forEach(function (button) { button.addEventListener('click', function () { choose(button.dataset.potColor); }); });
   palette.hidden = false;
-  var selectedColor = select.selectedOptions[0] && select.selectedOptions[0].dataset.color;
-  choose(colors[selectedColor] ? selectedColor : buttons[0].dataset.potColor);
+  var firstAvailable = buttons.find(function (button) {
+    return options.some(function (option) { return option.dataset.color === button.dataset.potColor && option.dataset.instock === '1'; });
+  });
+  var firstWithSizes = buttons.find(function (button) {
+    return options.some(function (option) { return option.dataset.color === button.dataset.potColor; });
+  });
+  choose((firstAvailable || firstWithSizes || buttons[0]).dataset.potColor);
 })();

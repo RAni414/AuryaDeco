@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Version 2 : frais de livraison par produit + avis clients.
  * Les produits, commandes et photos existants ne sont pas touchés.
  */
-const DB_VERSION = 6;
+const DB_VERSION = 8;
 
 function run_migrations(PDO $pdo): void
 {
@@ -84,6 +84,22 @@ function run_migrations(PDO $pdo): void
     if ($cur < 6) {
         // Keep full size + color snapshots on past and future orders.
         $pdo->exec('ALTER TABLE order_items MODIFY COLUMN variant_label VARCHAR(200) NOT NULL');
+    }
+    if ($cur < 7) {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS customers (
+          id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(120) NOT NULL,
+          email VARCHAR(190) NOT NULL UNIQUE,
+          password_hash VARCHAR(255) NOT NULL,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+    if ($cur < 8) {
+        foreach (['usage_place' => 'VARCHAR(20) NULL', 'material_text' => 'VARCHAR(120) NULL', 'care_text' => 'VARCHAR(200) NULL', 'included_text' => 'VARCHAR(200) NULL'] as $column => $definition) {
+            $query = $pdo->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='products' AND COLUMN_NAME=?");
+            $query->execute([$column]);
+            if (!$query->fetchColumn()) $pdo->exec('ALTER TABLE products ADD COLUMN ' . $column . ' ' . $definition);
+        }
     }
     $pdo->prepare("INSERT INTO settings (k, v) VALUES ('db_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)")->execute([(string)DB_VERSION]);
 }

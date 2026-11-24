@@ -10,7 +10,7 @@ if ($p['kind'] === 'acc' && ($p['type'] ?? '') === 'pebbles') $optLabel = 'Poids
         data-color="<?= (int)($x['color_id'] ?? 0) ?>" data-size="<?= e(pot_size_label($x)) ?>"
         data-price="<?= e(money($x['price'])) ?>"
         data-old="<?= ($x['old_price'] !== null && (float)$x['old_price'] > (float)$x['price']) ? e(money($x['old_price'])) : '' ?>"
-        data-instock="<?= $ok ? '1' : '0' ?>"><?= e(variant_label($p, $x)) ?><?= $ok ? '' : ' (épuisé)' ?></option>
+        data-stock="<?= $x['stock'] === null ? '' : (int)$x['stock'] ?>" data-instock="<?= $ok ? '1' : '0' ?>"><?= e(variant_label($p, $x)) ?><?= $ok ? '' : ' (épuisé)' ?></option>
     <?php endforeach; ?>
   </select>
 <?php else: ?>
@@ -21,9 +21,12 @@ if ($p['kind'] === 'acc' && ($p['type'] ?? '') === 'pebbles') $optLabel = 'Poids
         <input type="radio" name="variant_id" value="<?= (int)$x['id'] ?>" <?= $i === $sel ? 'checked' : '' ?>
           data-price="<?= e(money($x['price'])) ?>"
           data-old="<?= ($x['old_price'] !== null && (float)$x['old_price'] > (float)$x['price']) ? e(money($x['old_price'])) : '' ?>"
-          data-instock="<?= $ok ? '1' : '0' ?>">
+          data-stock="<?= $x['stock'] === null ? '' : (int)$x['stock'] ?>" data-instock="<?= $ok ? '1' : '0' ?>">
         <span><?= e(variant_label($p, $x)) ?><?= $ok ? '' : ' (épuisé)' ?></span>
       </label>
     <?php endforeach; ?>
   </div>
 <?php endif; ?>
+
+<?php $selectedVariant = $p['variants'][$sel] ?? null; ?>
+<p class="selection-status" data-selection-status role="status"><?= $selectedVariant && in_stock($selectedVariant) ? 'En stock' : 'Cette taille est épuisée.' ?></p>

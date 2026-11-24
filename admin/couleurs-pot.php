@@ -9,6 +9,20 @@ $colors = pot_colors($productId);
 $id = (int)($_GET['id'] ?? 0);
 if ($id && !isset($colors[$id])) { flash('Cette couleur ne correspond pas au pot.', 'err'); redirect('admin/couleurs-pot.php?produit=' . $productId); }
 $color = $colors[$id] ?? ['name' => '', 'hex' => '#B6B2A9', 'position' => count($colors) + 1, 'photos' => []];
+$colorSizes = array_values(array_filter($product['variants'], fn($v) => (int)($v['color_id'] ?? 0) === $id));
+$sizeTemplate = !$colorSizes;
+if (!$colorSizes) {
+    $seenSizes = [];
+    foreach ($product['variants'] as $variant) {
+        $sizeLabel = pot_size_label($variant);
+        if (isset($seenSizes[$sizeLabel])) continue;
+        $seenSizes[$sizeLabel] = true;
+        $variant['id'] = 0;
+        $variant['stock'] = $variant['stock'] === null ? null : 0;
+        $colorSizes[] = $variant;
+    }
+}
+if (!$colorSizes) $colorSizes = [['id' => 0, 'label' => '', 'price' => '', 'old_price' => null, 'stock' => null]];
 $error = '';
 $editingId = $id;
 if (is_post()) {
@@ -18,6 +32,9 @@ if (is_post()) {
     $pdo = db();
     try {
         $values = pot_color_values($_POST);
+        if (!is_array($_POST['sizes'] ?? null)) throw new InvalidArgumentException('Le tableau des tailles est incomplet. Rechargez la page.');
+        $colorSizes = $_POST['sizes'];
+        $sizeRows = pot_color_size_values($colorSizes);
         $color = array_merge($color, $values);
         $remove = is_array($_POST['remove_photos'] ?? null) ? array_map('intval', $_POST['remove_photos']) : [];
         $files = $_FILES['photos'] ?? null;
@@ -35,6 +52,7 @@ if (is_post()) {
             // Keep existing size IDs for the first color, preserving carts and orders.
             if (!$colors) $pdo->prepare('UPDATE variants SET color_id=? WHERE product_id=? AND color_id IS NULL')->execute([$id, $productId]);
         }
+        save_pot_color_sizes($pdo, $productId, $id, $sizeRows);
         foreach ($color['photos'] as $photo) {
             if (in_array((int)$photo['id'], $remove, true)) {
                 $pdo->prepare('DELETE FROM pot_color_photos WHERE id=? AND color_id=?')->execute([$photo['id'], $id]);
@@ -45,7 +63,7 @@ if (is_post()) {
         foreach ($newFiles as $position => $file) $save->execute([$id, $file, count($color['photos']) + $position]);
         $pdo->commit();
         foreach ($removeFiles as $file) @unlink(UPLOAD_DIR . '/' . basename($file));
-        flash('Couleur enregistrée. Dans la fiche du pot, associez chaque ligne de taille à sa couleur.');
+        flash('Couleur, photos, tailles, prix et stocks enregistrés. Les changements sont visibles sur la fiche du pot.');
         redirect('admin/couleurs-pot.php?produit=' . $productId . '&id=' . $id);
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
@@ -57,14 +75,25 @@ if (is_post()) {
 admin_header('Couleurs de ' . $product['name'], 'produits');
 ?>
 <div class="shead"><h1>Couleurs — <?= e($product['name']) ?></h1><a class="btn ghost" href="<?= e(url('admin/produit.php?id=' . $productId)) ?>">Retour au pot</a></div>
-<p class="hint">Créez une couleur avec son nom, sa teinte et ses photos. La première couleur reprend les tailles existantes. Pour les suivantes, ajoutez les lignes de taille correspondantes dans la fiche du pot, avec leurs prix et stocks. Seules les couleurs associées à une taille apparaissent sur le site.</p>
-<div class="chips">
-  <?php foreach ($colors as $key => $item): ?><a class="sbtn" href="<?= e(url('admin/couleurs-pot.php?produit=' . $productId . '&id=' . $key)) ?>"><?= e($item['name']) ?></a><?php endforeach; ?>
+<p class="hint">Tout se règle ici : choisissez une couleur, ajoutez ses photos, puis ses tailles avec leurs prix et stocks. Un seul enregistrement met la fiche du pot à jour.</p>
+<?php
+$sizeCounts = [];
+foreach ($product['variants'] as $variant) {
+    $colorKey = (int)($variant['color_id'] ?? 0);
+    $sizeCounts[$colorKey] = ($sizeCounts[$colorKey] ?? 0) + 1;
+}
+?>
+<?php if ($id && empty($sizeCounts[$id])): ?>
+<div class="flash flash-err" role="status">Cette couleur a des photos mais aucune taille associée. Elle apparaît sur le site comme indisponible. <a href="#color-sizes">Configurer ses tailles ci-dessous</a>.</div>
+<?php endif; ?>
+<div class="chips color-manager__tabs">
+  <?php foreach ($colors as $key => $item): ?><a class="sbtn" href="<?= e(url('admin/couleurs-pot.php?produit=' . $productId . '&id=' . $key)) ?>"><span class="color-manager__dot" style="background:<?= e($item['hex']) ?>"></span><?= e($item['name']) ?></a><?php endforeach; ?>
   <a class="btn ghost" href="<?= e(url('admin/couleurs-pot.php?produit=' . $productId)) ?>">Ajouter une couleur</a>
 </div>
 <?php if ($error): ?><p role="alert"><?= e($error) ?></p><?php endif; ?>
-<form class="fs" method="post" enctype="multipart/form-data">
+<form class="fs color-manager" method="post" enctype="multipart/form-data" data-color-manager>
   <?= csrf_field() ?>
+  <p class="color-manager__preview"><span data-color-dot style="background:<?= e($color['hex']) ?>"></span><strong data-color-name><?= e($color['name'] ?: 'Votre couleur') ?></strong></p>
   <h2><?= $id ? 'Modifier la couleur' : 'Nouvelle couleur' ?></h2>
   <div class="row">
     <label class="field">Nom de la couleur<input name="name" maxlength="60" value="<?= e($color['name']) ?>" placeholder="Ex. Ivoire, Noir mat, Terracotta" required></label>
@@ -76,6 +105,8 @@ admin_header('Couleurs de ' . $product['name'], 'produits');
   </div>
   <label class="field">Photos de cette couleur<input type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple></label>
   <p class="hint">JPG, PNG ou WebP, jusqu’à 10 Mo par photo. La première photo est la principale de la couleur. Sans photo, les images générales du pot sont utilisées.</p>
-  <button class="btn" type="submit">Enregistrer la couleur</button>
+  <?php require __DIR__ . '/../includes/pot-color-sizes-editor.php'; ?>
+  <button class="btn" type="submit">Enregistrer couleur, photos et tailles</button>
 </form>
+<script src="<?= e(url('assets/js/color-manager.js')) ?>?v=1" defer></script>
 <?php admin_footer();

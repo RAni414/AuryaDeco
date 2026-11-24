@@ -3,6 +3,7 @@ require __DIR__ . '/../includes/admin.php';
 require_admin();
 require_once __DIR__ . '/../includes/catalogue-categories.php';
 require_once __DIR__ . '/../includes/pot-colors.php';
+require_once __DIR__ . '/../includes/product-information.php';
 
 $id = (int)($_GET['id'] ?? 0);
 $copyOf = (int)($_GET['copie'] ?? 0);
@@ -62,6 +63,8 @@ if (is_post()) {
         'position' => (int)($in['position'] ?? 0),
         'shipping_fee' => ($sf = str_replace(',', '.', trim((string)($in['shipping_fee'] ?? '')))) === '' ? null : $sf,
     ]);
+    try { $p = array_merge($p, product_information_values($in)); }
+    catch (InvalidArgumentException $e) { $errors[] = $e->getMessage(); }
     if ($p['shipping_fee'] !== null && (!is_numeric($p['shipping_fee']) || (float)$p['shipping_fee'] < 0)) $errors[] = 'Les frais de livraison doivent être un nombre positif (ou 0 pour une livraison offerte).';
     if ($name === '') $errors[] = 'Indiquez le nom du produit.';
     if ($p['open_min'] && $p['open_max'] && $p['open_min'] > $p['open_max']) $errors[] = "L'ouverture minimale doit être inférieure à l'ouverture maximale.";
@@ -106,16 +109,16 @@ if (is_post()) {
                 }
             }
             $pdo->beginTransaction();
-            $cols = [$p['kind'], $p['name'], $p['type'], $p['shape'], $p['mat'], $p['color'], $p['open_min'], $p['open_max'], $p['tomb'], $p['featured'], $p['active'], $p['description'], $p['position'], $p['shipping_fee']];
+            $cols = [$p['kind'], $p['name'], $p['type'], $p['shape'], $p['mat'], $p['color'], $p['open_min'], $p['open_max'], $p['tomb'], $p['featured'], $p['active'], $p['description'], $p['position'], $p['shipping_fee'], $p['usage_place'], $p['material_text'], $p['care_text'], $p['included_text']];
             if ($p['id']) {
-                $pdo->prepare('UPDATE products SET kind=?, name=?, type=?, shape=?, mat=?, color=?, open_min=?, open_max=?, tomb=?, featured=?, active=?, description=?, position=?, shipping_fee=? WHERE id=?')
+                $pdo->prepare('UPDATE products SET kind=?, name=?, type=?, shape=?, mat=?, color=?, open_min=?, open_max=?, tomb=?, featured=?, active=?, description=?, position=?, shipping_fee=?, usage_place=?, material_text=?, care_text=?, included_text=? WHERE id=?')
                     ->execute(array_merge($cols, [$p['id']]));
             } else {
                 $slug = slugify($p['name']);
                 $chk = $pdo->prepare('SELECT COUNT(*) FROM products WHERE slug = ?');
                 $base = $slug;
                 for ($n = 2; ; $n++) { $chk->execute([$slug]); if (!$chk->fetchColumn()) break; $slug = $base . '-' . $n; }
-                $pdo->prepare('INSERT INTO products (slug, kind, name, type, shape, mat, color, open_min, open_max, tomb, featured, active, description, position, shipping_fee) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+                $pdo->prepare('INSERT INTO products (slug, kind, name, type, shape, mat, color, open_min, open_max, tomb, featured, active, description, position, shipping_fee, usage_place, material_text, care_text, included_text) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
                     ->execute(array_merge([$slug], $cols));
                 $p['id'] = (int)$pdo->lastInsertId();
                 $p['slug'] = $slug;
@@ -213,6 +216,7 @@ admin_header($p['id'] ? 'Modifier ' . $p['name'] : 'Nouveau produit', 'produits'
       <div class="row only-acc"><label class="field">Illustration (si pas de photo)<select name="acc_type"><?= $opt(ACC_TYPES, $k === 'acc' ? $p['type'] : 'pebbles') ?></select></label></div>
     </fieldset>
 
+    <?php require __DIR__ . '/../includes/product-information-editor.php'; ?>
     <?php require __DIR__ . '/../includes/product-categories-editor.php'; ?>
 
     <?php require __DIR__ . '/../includes/pot-colors-editor.php'; ?>
