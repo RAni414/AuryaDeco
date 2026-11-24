@@ -10,6 +10,25 @@
     if (e.key === 'Escape') { nav.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', 'Ouvrir le menu'); btn.focus(); }
   });
 
+  // Compact header search, controlled by the inline magnifying glass.
+  var searchToggle = document.getElementById('mobileSearchBtn');
+  var mobileSearch = document.getElementById('mobile-search');
+  if (searchToggle && mobileSearch) {
+    function setSearchOpen(open) {
+      mobileSearch.classList.toggle('is-open', open);
+      searchToggle.setAttribute('aria-expanded', String(open));
+      searchToggle.setAttribute('aria-label', open ? 'Fermer la recherche' : 'Ouvrir la recherche');
+      if (open) mobileSearch.querySelector('input[type="search"]').focus();
+    }
+    searchToggle.addEventListener('click', function () {
+      setSearchOpen(searchToggle.getAttribute('aria-expanded') !== 'true');
+    });
+    mobileSearch.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') { setSearchOpen(false); searchToggle.focus(); }
+    });
+    if (btn) btn.addEventListener('click', function () { setSearchOpen(false); });
+  }
+
   // Boutons + / − des quantités
   document.addEventListener('click', function (e) {
     var s = e.target.closest('[data-step]');

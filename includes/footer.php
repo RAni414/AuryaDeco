@@ -62,7 +62,7 @@ $mobileLinks = [
 <?php endforeach; ?>
 </nav>
 <script src="<?= e(url('assets/js/art.js')) ?>?v=1"></script>
-<script src="<?= e(url('assets/js/shop.js')) ?>?v=2"></script>
+<script src="<?= e(url('assets/js/shop.js')) ?>?v=3"></script>
 <script src="<?= e(url('assets/js/product-cards.js')) ?>?v=3" data-card-script data-cart="<?= e(url('panier.php')) ?>" data-csrf="<?= e(csrf_token()) ?>" defer></script>
 <?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/product-carousel.js')) ?>?v=1" defer></script><?php endif; ?>
 <div class="fav-notice" role="status" aria-live="polite" data-favorites-notice hidden></div>

@@ -26,7 +26,7 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <link rel="stylesheet" href="<?= e(url('assets/css/product-cards.css')) ?>?v=2">
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/product-carousel.css')) ?>?v=2"><?php endif; ?>
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/home.css')) ?>?v=6"><?php endif; ?>
-<link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=3">
+<link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=4">
 <link rel="stylesheet" href="<?= e(url('assets/css/reviews.css')) ?>?v=2">
 <link rel="icon" type="image/png" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
 <link rel="apple-touch-icon" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
@@ -51,6 +51,9 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
       <button aria-label="Lancer la recherche"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     </form>
     <div class="icons">
+      <button class="ibtn mobile-search-toggle" type="button" aria-label="Ouvrir la recherche" aria-expanded="false" aria-controls="mobile-search" id="mobileSearchBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
       <a class="ibtn favorites-link" href="<?= e(url('includes/favoris.php')) ?>" aria-label="Mes favoris, 0 produit">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg>
         <span class="fav-count" data-favorites-count hidden>0</span>
@@ -61,7 +64,7 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
       </a>
     </div>
   </div>
-  <div class="msearch">
+  <div class="msearch" id="mobile-search">
     <form class="search" role="search" action="<?= e(url('boutique.php')) ?>" method="get">
       <input type="search" name="q" value="<?= e($q) ?>" placeholder="Rechercher une plante, un pot…" aria-label="Rechercher">
       <button aria-label="Lancer la recherche"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
