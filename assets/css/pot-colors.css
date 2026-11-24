@@ -9,3 +9,5 @@
 .pot-swatch:hover{border-color:var(--forest)}
 .pot-swatch:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
 #vTable .only-pot select{min-width:120px}
+.pot-custom-color{display:flex;align-items:flex-start;gap:8px;margin:0 0 20px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:14px;line-height:1.6}
+.pot-custom-color>span{flex-shrink:0}

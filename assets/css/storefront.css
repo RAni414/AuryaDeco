@@ -80,3 +80,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   .shop-filter-actions .btn{width:100%}.shop-filter-actions{justify-content:center;gap:12px}
   .co>.cart-list{padding:16px}.cart-list .line{padding-top:18px;padding-bottom:18px}.cart-list .nm{font-size:15px;line-height:1.5}.cart-list .vr{font-size:13px;line-height:1.6}
 }
+
+/* Pot dimensions replace size/color counters on every catalogue card. */
+.pcard .sizes{line-height:1.7;overflow-wrap:anywhere}
+.aurya-home .home-pot-collection .pcard .sizes{display:block;font-size:13px;line-height:1.7}

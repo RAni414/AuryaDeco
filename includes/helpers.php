@@ -200,7 +200,13 @@ function load_product_by(string $field, $value, bool $onlyActive = true): ?array
 
 function pot_size_label(array $v): string
 {
-    return trim((string)($v['label'] ?? '')) ?: ('D ' . (int)($v['diameter'] ?? 0) . ' cm');
+    require_once __DIR__ . '/pot-dimensions.php';
+    $dimensions = pot_dimensions($v);
+    if ($dimensions) return pot_dimension_text($dimensions);
+    $label = trim((string)($v['label'] ?? ''));
+    $color = trim((string)($v['color_name'] ?? ''));
+    if ($color !== '') $label = preg_replace('/\s*[·|]\s*' . preg_quote($color, '/') . '\s*$/iu', '', $label);
+    return $label;
 }
 
 function variant_label(array $p, array $v): string
@@ -266,7 +272,10 @@ function price_range(array $p): string
 function sizes_text(array $p): string
 {
     if ($p['kind'] === 'acc') return implode(' / ', array_map(fn($v) => variant_label($p, $v), $p['variants']));
-    if ($p['kind'] === 'pot') return implode(' / ', array_map(fn($v) => variant_label($p, $v), $p['variants']));
+    if ($p['kind'] === 'pot') {
+        require_once __DIR__ . '/pot-dimensions.php';
+        return implode(' / ', pot_unique_size_labels($p['variants']));
+    }
     $vals = [];
     foreach ($p['variants'] as $v) {
         $vals[] = $p['kind'] === 'plante' ? (int)$v['height'] : ($p['kind'] === 'pot' ? (int)$v['diameter'] : $v['label']);
@@ -323,9 +332,7 @@ function favorite_button(int $id): string
 
 function product_card_pot_options(array $p): string
 {
-    $sizes = count(array_unique(array_map('pot_size_label', $p['variants'])));
-    $colors = count(array_unique(array_filter(array_column($p['variants'], 'color_name'))));
-    return $sizes . ' taille' . ($sizes > 1 ? 's' : '') . ($colors ? ' · ' . $colors . ' couleur' . ($colors > 1 ? 's' : '') : '');
+    return sizes_text($p);
 }
 
 function product_card(array $p, string $extra = ''): string

@@ -30,7 +30,7 @@ try {
     }
     $p = load_product_by('id', $pid);
     verify_color($p['variants'][0]['color_name'] === 'Ivoire' && $p['variants'][1]['color_name'] === 'Noir', 'size variants retain their color identity');
-    verify_color(variant_label($p, $p['variants'][0]) === 'H 30 cm - D 25 cm · Ivoire', 'cart and order labels contain size and color');
+    verify_color(variant_label($p, $p['variants'][0]) === 'H 30 cm · D 25 cm · Ivoire', 'cart and order labels contain size and color');
     $palette = pot_colors($pid);
     verify_color($palette[$colors[0]]['photos'][0]['file'] === 'ivory.jpg' && $palette[$colors[1]]['photos'][0]['file'] === 'black.jpg', 'each color keeps its own photos');
     $_SESSION['cart'] = [$variants[0] => 1, $variants[1] => 2];
@@ -45,7 +45,7 @@ try {
     $sel = 0;
     ob_start(); require __DIR__ . '/../../includes/product-options.php'; $html = ob_get_clean();
     verify_color(str_contains($html, 'data-pot-palette=') && str_contains($html, 'data-color="' . $colors[1] . '"'), 'palette and size filter data rendered');
-    verify_color(str_contains($html, 'data-size="H 30 cm - D 25 cm"'), 'size remains distinct from color label');
+    verify_color(str_contains($html, 'data-size="H 30 cm · D 25 cm"'), 'size remains distinct from color label');
     verify_color(str_contains($html, 'data-pot-color="' . $unassignedColor . '"'), 'saved color remains visible before sizes are assigned');
     $newRows = pot_color_size_values([['id' => 0, 'label' => 'Grand', 'price' => '79,5', 'old_price' => '', 'stock' => '4']]);
     save_pot_color_sizes($pdo, $pid, $unassignedColor, $newRows);

@@ -18,7 +18,7 @@ function product_information(array $product): array
     $facts = [];
     if ($product['kind'] === 'plante') $facts['Hauteurs disponibles'] = sizes_text($product);
     elseif ($product['kind'] === 'pot') {
-        $facts['Tailles disponibles'] = implode(' / ', array_unique(array_map('pot_size_label', $product['variants'])));
+        $facts['Tailles disponibles'] = sizes_text($product);
         $colors = array_unique(array_filter(array_column($product['variants'], 'color_name')));
         if ($colors) $facts['Couleurs'] = implode(', ', $colors);
     } else $facts[($product['type'] ?? '') === 'pebbles' ? 'Poids disponibles' : 'Formats disponibles'] = sizes_text($product);

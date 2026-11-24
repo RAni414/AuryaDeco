@@ -23,13 +23,14 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <link rel="stylesheet" href="<?= e(url('assets/css/interface.css')) ?>?v=3">
 <link rel="stylesheet" href="<?= e(url('assets/css/favorites.css')) ?>?v=1">
 <link rel="stylesheet" href="<?= e(url('assets/css/product-cards.css')) ?>?v=2">
-<link rel="stylesheet" href="<?= e(url('assets/css/pot-colors.css')) ?>?v=1">
+<link rel="stylesheet" href="<?= e(url('assets/css/pot-colors.css')) ?>?v=2">
 <link rel="stylesheet" href="<?= e(url('assets/css/customer-account.css')) ?>?v=1">
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/product-carousel.css')) ?>?v=2"><?php endif; ?>
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/home.css')) ?>?v=6"><?php endif; ?>
-<link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=6">
+<link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=7">
 <link rel="stylesheet" href="<?= e(url('assets/css/reviews.css')) ?>?v=3">
-<link rel="stylesheet" href="<?= e(url('assets/css/storefront.css')) ?>?v=1">
+<link rel="stylesheet" href="<?= e(url('assets/css/storefront.css')) ?>?v=2">
+<link rel="stylesheet" href="<?= e(url('assets/css/navigation-drawer.css')) ?>?v=1">
 <link rel="icon" type="image/png" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
 <link rel="apple-touch-icon" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
 </head>
@@ -42,9 +43,14 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 
 <header class="site has-favorites">
   <div class="wrap hrow">
+    <div class="header-start">
     <button class="ibtn menu-toggle" id="menuBtn" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mainNav">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
+      <button class="ibtn mobile-search-toggle" type="button" aria-label="Ouvrir la recherche" aria-expanded="false" aria-controls="mobile-search" id="mobileSearchBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+    </div>
     <a class="logo" href="<?= e(url('index.php')) ?>" aria-label="Accueil">
       <img class="aurya-brand-image" src="<?= e(url('assets/images/aurya-logo.png')) ?>" width="1774" height="887" alt="Aurya Déco" fetchpriority="high">
     </a>
@@ -53,9 +59,12 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
       <button aria-label="Lancer la recherche"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     </form>
     <div class="icons">
-      <button class="ibtn mobile-search-toggle" type="button" aria-label="Ouvrir la recherche" aria-expanded="false" aria-controls="mobile-search" id="mobileSearchBtn">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      </button>
+      <a class="ibtn header-account" href="<?= e(url('includes/compte.php')) ?>" aria-label="Mon compte" title="Mon compte">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>
+        <span class="header-account__label">Mon compte</span>
+      </a>
+
+
       <a class="ibtn favorites-link" href="<?= e(url('includes/favoris.php')) ?>" aria-label="Mes favoris, 0 produit">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg>
         <span class="fav-count" data-favorites-count hidden>0</span>
@@ -72,10 +81,10 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
       <button aria-label="Lancer la recherche"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     </form>
   </div>
-  <nav class="main" id="mainNav" aria-label="Navigation du site" data-active-panel="categories">
+  <nav class="main" id="mainNav" aria-label="Navigation du site" data-menu-view="menu">
     <?php require __DIR__ . '/navigation-menu.php'; ?>
   </nav>
-  <button type="button" class="menu-backdrop" data-drawer-backdrop aria-label="Fermer le menu" hidden tabindex="-1"></button>
+  <button class="menu-shade" type="button" data-menu-shade aria-label="Fermer le menu" hidden tabindex="-1"></button>
 </header>
 
 <main id="app">

@@ -13,9 +13,6 @@ function navigation_defaults(): array
         'shop' => ['label' => 'Toute la boutique', 'path' => 'boutique.php'],
         'pro' => ['label' => 'Professionnels', 'path' => 'page.php?p=pro'],
         'promo' => ['label' => 'Promotions', 'path' => 'boutique.php?promo=1'],
-        'account' => ['label' => 'Mon compte', 'path' => 'includes/compte.php'],
-        'cart' => ['label' => 'Mon panier', 'path' => 'panier.php'],
-        'checkout' => ['label' => 'Commande', 'path' => 'commande.php'],
     ];
     foreach ($items as $key => &$item) {
         $item += ['children' => [], 'visible' => true, 'order' => array_search($key, array_keys($items), true) + 1];

@@ -103,7 +103,7 @@ function admin_header(string $title, string $active = ''): void
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(url('assets/css/style.css')) ?>?v=1">
-<link rel="stylesheet" href="<?= e(url('assets/css/admin.css')) ?>?v=3">
+<link rel="stylesheet" href="<?= e(url('assets/css/admin.css')) ?>?v=4">
 </head>
 <body class="admin-body">
 <header class="abar">

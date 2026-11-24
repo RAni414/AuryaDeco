@@ -111,3 +111,7 @@ form.fs legend{float:left;width:100%;padding:0;margin-bottom:4px}
 .color-manager__sizes input:not([type=checkbox]):not([type=hidden]){min-width:95px;max-width:220px;width:100%;box-sizing:border-box}
 .color-manager__sizes tr:has(input[type=checkbox]:checked){opacity:.55;background:var(--bg)}
 .color-manager .photo:has(input[type=checkbox]:checked) img{opacity:.35}
+
+.pot-dimension-inputs{display:grid;grid-template-columns:repeat(3,minmax(75px,1fr));gap:8px;margin-top:10px;min-width:245px}
+.pot-dimension-inputs label{font-size:12px;display:block;color:var(--muted)}
+.pot-dimension-inputs input{display:block;width:100%;box-sizing:border-box;margin-top:4px;min-width:0!important}

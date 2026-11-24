@@ -1,4 +1,16 @@
 <?php
+function shop_pot_size_options(): array
+{
+    $options = [];
+    $rows = db()->query("SELECT v.id,v.label,v.height,v.diameter,c.name AS color_name FROM variants v JOIN products p ON p.id=v.product_id LEFT JOIN pot_colors c ON c.id=v.color_id AND c.product_id=v.product_id WHERE p.active=1 AND p.kind='pot'");
+    foreach ($rows as $row) {
+        $label = pot_size_label($row);
+        if ($label !== '') $options[$label][] = (int)$row['id'];
+    }
+    uksort($options, 'strnatcasecmp');
+    return $options;
+}
+
 function shop_filter_values(array $input): array
 {
     $keys = ['cat', 'taille', 'mat', 'q', 'tri', 'min', 'max', 'color', 'pot_size', 'usage', 'available', 'promo'];
@@ -44,7 +56,11 @@ function shop_filter_query(array $f): array
     }
     foreach (['min' => '>=', 'max' => '<='] as $key => $operator) if ($f[$key] !== '') { $variant[] = 'v.price ' . $operator . ' ?'; $vparams[] = $f[$key]; }
     if ($f['color']) { $variant[] = 'c.name=?'; $vparams[] = $f['color']; }
-    if ($f['pot_size']) { $variant[] = "COALESCE(NULLIF(TRIM(v.label),''),CONCAT('D ',v.diameter,' cm'))=?"; $vparams[] = $f['pot_size']; }
+    if ($f['pot_size']) {
+        $sizeOptions = shop_pot_size_options();
+        $sizeIds = $sizeOptions[$f['pot_size']] ?? [];
+        $variant[] = $sizeIds ? 'v.id IN (' . implode(',', $sizeIds) . ')' : '1=0';
+    }
     if ($f['available']) $variant[] = '(v.stock IS NULL OR v.stock>0)';
     if ($f['promo']) $variant[] = 'v.old_price>v.price';
     // A single variant must satisfy every size/color/price/stock condition.

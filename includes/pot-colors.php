@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/pot-dimensions.php';
 function pot_colors(int $productId): array
 {
     $query = db()->prepare('SELECT * FROM pot_colors WHERE product_id=? ORDER BY position,id');
@@ -35,6 +36,7 @@ function pot_color_size_values(array $input): array
         if ($id === false || ($id && isset($ids[$id]))) throw new InvalidArgumentException('Une taille est invalide ou présente deux fois.');
         if ($id) $ids[$id] = true;
         if (!empty($row['remove'])) { if ($id) $rows[] = ['id' => $id, 'remove' => true]; continue; }
+        $label = pot_size_input_label($row);
         if (!$id && $label === '' && $price === '' && $old === '' && $stock === '') continue;
         if ($label === '' || mb_strlen($label) > 80 || !is_numeric($price) || (float)$price <= 0 || (float)$price > 9999999.999 || ($old !== '' && (!is_numeric($old) || (float)$old < 0 || (float)$old > 9999999.999))) throw new InvalidArgumentException('Chaque taille doit avoir un nom (80 caractères maximum) et un prix valide.');
         $stockValue = $stock === '' ? null : filter_var($stock, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 2147483647]]);

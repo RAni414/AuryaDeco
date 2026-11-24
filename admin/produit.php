@@ -82,6 +82,10 @@ if (is_post()) {
             'old_price' => ($o = str_replace(',', '.', trim((string)($vin['old'][$i] ?? '')))) === '' ? null : $o,
             'stock' => ($s = trim((string)($vin['stock'][$i] ?? ''))) === '' ? null : (int)$s,
         ];
+        if ($kind === 'pot') {
+            try { $row['label'] = pot_size_input_label(array_merge($row, ['dimension_h' => $vin['dimension_h'][$i] ?? '', 'dimension_d' => $vin['dimension_d'][$i] ?? '', 'dimension_l' => $vin['dimension_l'][$i] ?? ''])); }
+            catch (InvalidArgumentException $e) { $errors[] = $e->getMessage(); }
+        }
         $empty = $row['price'] === '' && !$row['height'] && !$row['diameter'] && !$row['label'];
         if ($empty) continue;
         $n = count($variants) + 1;
@@ -232,7 +236,7 @@ admin_header($p['id'] ? 'Modifier ' . $p['name'] : 'Nouveau produit', 'produits'
             <td class="only-pot"><select name="v[color_id][]" aria-label="Couleur de cette taille"><option value="">Sans couleur</option><?php foreach ($potColors as $colorId => $potColor): ?><option value="<?= $colorId ?>" <?= (int)($v['color_id'] ?? 0) === $colorId ? 'selected' : '' ?>><?= e($potColor['name']) ?></option><?php endforeach; ?></select></td>
             <td><input type="hidden" name="v[id][]" value="<?= (int)$v['id'] ?>">
               <input class="sz-num" type="number" min="1" name="v[size][]" value="<?= e($k === 'plante' ? $v['height'] : ($k === 'pot' ? $v['diameter'] : '')) ?>" aria-label="Taille">
-              <input class="sz-txt" type="text" name="v[label][]" value="<?= e($k === 'pot' ? pot_size_label($v) : $v['label']) ?>" maxlength="80" placeholder="<?= $k === 'pot' ? 'H 25,5 cm - D 25,5 cm' : 'Format' ?>" aria-label="Taille ou format"></td>
+              <input class="sz-txt" type="text" name="v[label][]" value="<?= e($k === 'pot' ? pot_size_label($v) : $v['label']) ?>" maxlength="80" placeholder="<?= $k === 'pot' ? 'H 25,5 cm - D 25,5 cm' : 'Format' ?>" aria-label="Taille ou format"><?php $dimensions = pot_dimensions($v); ?><div class="pot-dimension-inputs only-pot"><?php foreach (['H' => 'dimension_h', 'D' => 'dimension_d', 'L' => 'dimension_l'] as $axis => $field): ?><label><?= $axis ?> (cm)<input type="number" min="0.01" max="99999.99" step="0.01" name="v[<?= $field ?>][]" value="<?= e($dimensions[$axis] ?? '') ?>" aria-label="<?= e(['H' => 'Hauteur', 'D' => 'Diamètre', 'L' => 'Largeur'][$axis]) ?> en cm"></label><?php endforeach; ?></div></td>
             <td><input type="text" inputmode="decimal" name="v[price][]" value="<?= e($v['price'] === '' ? '' : rtrim(rtrim((string)$v['price'], '0'), '.')) ?>" aria-label="Prix"></td>
             <td><input type="text" inputmode="decimal" name="v[old][]" value="<?= e($v['old_price'] === null ? '' : rtrim(rtrim((string)$v['old_price'], '0'), '.')) ?>" placeholder="facultatif" aria-label="Ancien prix"></td>
             <td><input type="number" name="v[stock][]" min="0" value="<?= e($v['stock']) ?>" placeholder="illimité" aria-label="Stock"></td>

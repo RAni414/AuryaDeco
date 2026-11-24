@@ -3,6 +3,7 @@ if ($p['kind'] === 'acc' && ($p['type'] ?? '') === 'pebbles') $optLabel = 'Poids
 ?>
 <?php if ($p['kind'] === 'pot'): ?>
   <?php require __DIR__ . '/pot-palette.php'; ?>
+  <p class="pot-custom-color"><span aria-hidden="true">🎨</span> Couleur personnalisée disponible sur demande.</p>
   <label class="opt-label" for="pot-size">Taille des pots</label>
   <select id="pot-size" name="variant_id" required style="width:100%;max-width:420px;margin:10px 0 20px;padding:14px;border:1px solid #cbd4c3;border-radius:8px;background:#fff;color:#294735">
     <?php foreach ($p['variants'] as $i => $x): $ok = in_stock($x); ?>

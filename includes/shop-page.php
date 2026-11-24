@@ -10,7 +10,7 @@ $pageTitle = $filters['q'] !== '' ? 'Résultats pour « ' . $filters['q'] . ' »
 if ($filters['taille']) $pageTitle = BANDS[$filters['taille']];
 if ($filters['mat']) $pageTitle = 'Pots en ' . mb_strtolower(MATS[$filters['mat']]);
 $colorOptions = db()->query("SELECT DISTINCT c.name FROM pot_colors c JOIN products p ON p.id=c.product_id WHERE p.active=1 AND p.kind='pot' ORDER BY c.name")->fetchAll(PDO::FETCH_COLUMN);
-$sizeOptions = db()->query("SELECT DISTINCT COALESCE(NULLIF(TRIM(v.label),''),CONCAT('D ',v.diameter,' cm')) AS size_label FROM variants v JOIN products p ON p.id=v.product_id WHERE p.active=1 AND p.kind='pot' ORDER BY size_label")->fetchAll(PDO::FETCH_COLUMN);
+$sizeOptions = array_keys(shop_pot_size_options());
 require __DIR__ . '/header.php';
 ?>
 <div class="wrap shop-page">

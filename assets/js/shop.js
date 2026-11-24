@@ -1,19 +1,18 @@
 (function () {
-  // Mobile drawer: categories and customer links, with keyboard navigation.
+  // Reference-style category drawer; account access stays in the header.
   var btn = document.getElementById('menuBtn'), nav = document.getElementById('mainNav');
-  var drawerBackdrop = document.querySelector('[data-drawer-backdrop]');
   var menuViewport = window.matchMedia('(max-width:860px)');
+  var menuShade = document.querySelector('[data-menu-shade]');
   function setMenuOpen(open, returnFocus) {
     if (!btn || !nav) return;
     open = open && menuViewport.matches;
     nav.classList.toggle('open', open);
     btn.setAttribute('aria-expanded', String(open));
     btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
-    if (drawerBackdrop) drawerBackdrop.hidden = !open;
+    if (menuShade) menuShade.hidden = !open;
     if (open) {
       nav.setAttribute('role', 'dialog'); nav.setAttribute('aria-modal', 'true');
-      var close = nav.querySelector('[data-drawer-close]');
-      if (close) close.focus();
+      nav.querySelector('[data-menu-close]').focus();
     } else {
       nav.removeAttribute('role'); nav.removeAttribute('aria-modal');
       if (returnFocus) btn.focus();
@@ -21,13 +20,19 @@
   }
   if (btn && nav) {
     btn.addEventListener('click', function () { setMenuOpen(!nav.classList.contains('open'), false); });
-    var drawerClose = nav.querySelector('[data-drawer-close]');
-    if (drawerClose) drawerClose.addEventListener('click', function () { setMenuOpen(false, true); });
-    if (drawerBackdrop) drawerBackdrop.addEventListener('click', function () { setMenuOpen(false, true); });
-    nav.querySelectorAll('[data-drawer-tab]').forEach(function (tab) {
+    var closeMenuButton = nav.querySelector('[data-menu-close]');
+    if (closeMenuButton) closeMenuButton.addEventListener('click', function () { setMenuOpen(false, true); });
+    if (menuShade) menuShade.addEventListener('click', function () { setMenuOpen(false, true); });
+    nav.querySelectorAll('[data-menu-view]').forEach(function (tab) {
       tab.addEventListener('click', function () {
-        nav.dataset.activePanel = tab.dataset.drawerTab;
-        nav.querySelectorAll('[data-drawer-tab]').forEach(function (item) { item.setAttribute('aria-pressed', String(item === tab)); });
+        nav.dataset.menuView = tab.dataset.menuView;
+        nav.querySelectorAll('button[data-menu-view]').forEach(function (button) { button.setAttribute('aria-pressed', String(button === tab)); });
+      });
+    });
+    nav.querySelectorAll('[data-menu-children]').forEach(function (toggle) {
+      toggle.addEventListener('click', function () {
+        var open = toggle.closest('li').classList.toggle('is-expanded');
+        toggle.setAttribute('aria-expanded', String(open));
       });
     });
     document.addEventListener('keydown', function (event) {
