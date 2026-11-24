@@ -70,6 +70,7 @@ $mobileLinks = [
 <script src="<?= e(url('assets/js/deco.js')) ?>?v=8" defer></script>
 <script src="<?= e(url('assets/js/interface.js')) ?>?v=1" defer></script>
 <?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/home.js')) ?>?v=2"></script><?php endif; ?>
-<?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/reviews.js')) ?>?v=1" defer></script><?php endif; ?>
+<?php if (!empty($homePage) || basename($_SERVER['SCRIPT_NAME'] ?? '') === 'avis.php'): ?><script src="<?= e(url('assets/js/reviews.js')) ?>?v=2" defer></script><?php endif; ?>
+<script src="<?= e(url('assets/js/pot-colors.js')) ?>?v=1" defer></script>
 </body>
 </html>

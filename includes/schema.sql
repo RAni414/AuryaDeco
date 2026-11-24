@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   product_id INT UNSIGNED NULL,
   variant_id INT UNSIGNED NULL,
   name VARCHAR(160) NOT NULL,
-  variant_label VARCHAR(80) NOT NULL,
+  variant_label VARCHAR(200) NOT NULL,
   price DECIMAL(10,3) NOT NULL,
   qty INT UNSIGNED NOT NULL,
   CONSTRAINT fk_item_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,

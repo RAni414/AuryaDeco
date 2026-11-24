@@ -1,0 +1,11 @@
+.pot-palette{border:0;padding:0;margin:0 0 22px;min-width:0}
+.pot-palette[hidden],.pot-color-thumbs[hidden]{display:none}
+.pot-palette legend{padding:0;margin-bottom:12px;font-weight:600;font-size:15px}
+.pot-palette legend span{font-weight:400;color:var(--muted)}
+.pot-palette__choices{display:flex;gap:10px;flex-wrap:wrap}
+.pot-swatch{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 12px 6px 7px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
+.pot-swatch>span:first-child{width:27px;height:27px;flex:0 0 27px;border-radius:50%;background:var(--pot-swatch);border:1px solid #00000025;box-shadow:inset 0 0 0 2px #ffffff44}
+.pot-swatch[aria-pressed=true]{border:2px solid var(--forest);padding:5px 11px 5px 6px;background:var(--card)}
+.pot-swatch:hover{border-color:var(--forest)}
+.pot-swatch:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+#vTable .only-pot select{min-width:120px}

@@ -38,8 +38,8 @@ if (is_post()) {
         db()->prepare('UPDATE products SET active = 1 - active WHERE id = ?')->execute([$id]);
         flash('Visibilité du produit modifiée.');
     } elseif ($act === 'delete') {
-        $imgs = db()->prepare('SELECT file FROM product_images WHERE product_id = ?');
-        $imgs->execute([$id]);
+        $imgs = db()->prepare('SELECT file FROM product_images WHERE product_id = ? UNION ALL SELECT cp.file FROM pot_color_photos cp JOIN pot_colors c ON c.id=cp.color_id WHERE c.product_id=?');
+        $imgs->execute([$id, $id]);
         foreach ($imgs->fetchAll(PDO::FETCH_COLUMN) as $f) {
             @unlink(UPLOAD_DIR . '/' . basename($f));
         }

@@ -180,7 +180,7 @@ function load_products(string $where = '1', array $params = [], string $order = 
         return [];
     }
     $ids = implode(',', array_keys($products));
-    foreach (db()->query("SELECT * FROM variants WHERE product_id IN ($ids) ORDER BY position ASC, id ASC") as $v) {
+    foreach (db()->query("SELECT v.*, c.name AS color_name FROM variants v LEFT JOIN pot_colors c ON c.id=v.color_id AND c.product_id=v.product_id WHERE v.product_id IN ($ids) ORDER BY v.position ASC, v.id ASC") as $v) {
         $products[(int)$v['product_id']]['variants'][] = $v;
     }
     foreach (db()->query("SELECT * FROM product_images WHERE product_id IN ($ids) ORDER BY position ASC, id ASC") as $i) {
@@ -196,13 +196,19 @@ function load_product_by(string $field, $value, bool $onlyActive = true): ?array
     return $list[0] ?? null;
 }
 
+function pot_size_label(array $v): string
+{
+    return trim((string)($v['label'] ?? '')) ?: ('D ' . (int)($v['diameter'] ?? 0) . ' cm');
+}
+
 function variant_label(array $p, array $v): string
 {
     if ($p['kind'] === 'plante') {
         return 'H ' . (int)$v['height'] . ' cm';
     }
     if ($p['kind'] === 'pot') {
-        return trim((string)($v['label'] ?? '')) ?: ('D ' . (int)$v['diameter'] . ' cm');
+        $size = pot_size_label($v);
+        return !empty($v['color_name']) ? $size . ' · ' . $v['color_name'] : $size;
     }
     $label = trim((string)$v['label']);
     if (($p['type'] ?? '') === 'pebbles' && preg_match('/^(\d+(?:[.,]\d+)?)\s*(?:kg)?$/i', $label, $weight)) {
@@ -372,8 +378,8 @@ function cart_lines(): array
         return [];
     }
     $ids = implode(',', array_map('intval', array_keys($cart)));
-    $rows = db()->query("SELECT v.*, p.name, p.slug, p.kind, p.type, p.shape, p.color, p.tomb, p.active, p.shipping_fee, p.id AS pid
-                         FROM variants v JOIN products p ON p.id = v.product_id WHERE v.id IN ($ids)")->fetchAll();
+    $rows = db()->query("SELECT v.*, c.name AS color_name, p.name, p.slug, p.kind, p.type, p.shape, p.color, p.tomb, p.active, p.shipping_fee, p.id AS pid
+                         FROM variants v JOIN products p ON p.id = v.product_id LEFT JOIN pot_colors c ON c.id=v.color_id AND c.product_id=v.product_id WHERE v.id IN ($ids)")->fetchAll();
     $lines = [];
     foreach ($rows as $r) {
         if (!$r['active']) {
@@ -383,6 +389,11 @@ function cart_lines(): array
         $img = db()->prepare('SELECT file FROM product_images WHERE product_id = ? ORDER BY position, id LIMIT 1');
         $img->execute([$r['pid']]);
         $f = $img->fetchColumn();
+        if (!empty($r['color_id'])) {
+            $colorPhoto = db()->prepare('SELECT file FROM pot_color_photos WHERE color_id=? ORDER BY position,id LIMIT 1');
+            $colorPhoto->execute([$r['color_id']]);
+            $f = $colorPhoto->fetchColumn() ?: $f;
+        }
         $p['images'] = $f ? [['file' => $f]] : [];
         $qty = (int)$cart[$r['id']];
         $lines[] = ['variant' => $r, 'product' => $p, 'qty' => $qty, 'label' => variant_label($p, $r), 'total' => (float)$r['price'] * $qty, 'ship' => product_ship_fee($r['shipping_fee'])];

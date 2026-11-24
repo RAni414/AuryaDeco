@@ -22,6 +22,7 @@
     var last = tbody.querySelector('tr:last-child');
     var row = last.cloneNode(true);
     row.querySelectorAll('input').forEach(function (i) { i.value = ''; });
+    row.querySelectorAll('select').forEach(function (select) { select.selectedIndex = 0; });
     row.querySelector('input[name="v[id][]"]').value = '0';
     tbody.appendChild(row);
     row.querySelector(form.dataset.kind === 'plante' ? '.sz-num' : '.sz-txt').focus();

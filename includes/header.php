@@ -14,8 +14,7 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title><?= e(isset($pageTitle) ? $pageTitle . ' · ' . $shopName : $shopName . ' · Plantes artificielles et pots de décoration') ?></title>
-<?php if (!empty($metaDesc)): ?><meta name="description" content="<?= e($metaDesc) ?>"><?php endif; ?>
+<?php require __DIR__ . '/seo-head.php'; ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,10 +23,11 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <link rel="stylesheet" href="<?= e(url('assets/css/interface.css')) ?>?v=3">
 <link rel="stylesheet" href="<?= e(url('assets/css/favorites.css')) ?>?v=1">
 <link rel="stylesheet" href="<?= e(url('assets/css/product-cards.css')) ?>?v=2">
+<link rel="stylesheet" href="<?= e(url('assets/css/pot-colors.css')) ?>?v=1">
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/product-carousel.css')) ?>?v=2"><?php endif; ?>
 <?php if (!empty($homePage)): ?><link rel="stylesheet" href="<?= e(url('assets/css/home.css')) ?>?v=6"><?php endif; ?>
 <link rel="stylesheet" href="<?= e(url('assets/css/mobile.css')) ?>?v=5">
-<link rel="stylesheet" href="<?= e(url('assets/css/reviews.css')) ?>?v=2">
+<link rel="stylesheet" href="<?= e(url('assets/css/reviews.css')) ?>?v=3">
 <link rel="icon" type="image/png" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
 <link rel="apple-touch-icon" href="<?= e(url('assets/images/aurya-icon.png')) ?>?v=1">
 </head>
