@@ -80,3 +80,15 @@ header.site .logo .aurya-brand-image{display:block;width:180px;height:90px;objec
   header.site .msearch.is-open{display:block!important}
   header.site .msearch .search{display:flex;width:100%;max-width:none}
 }
+
+/* Dropdown anchored beneath the mobile menu icon, without pushing the page. */
+@media(max-width:860px){
+  header.site:has(nav.main.open){z-index:60}
+  header.site nav.main{position:absolute;top:100%;left:16px;right:auto;width:300px;max-width:calc(100vw - 32px);box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:0 0 16px 16px;z-index:1}
+  header.site nav.main.open{display:block;max-height:60vh;max-height:min(60dvh,calc(100dvh - 200px));overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;box-shadow:0 14px 30px #19302526}
+  header.site nav.main>ul{display:flex;flex-direction:column;flex-wrap:nowrap;gap:4px;padding:10px;margin:0;max-width:none}
+  header.site nav.main>ul>li>a{padding:12px 10px;overflow-wrap:anywhere}
+  header.site nav.main .drop{position:static;min-width:0;padding:0 0 8px 6px}
+  header.site nav.main .drop a{flex-wrap:wrap;align-items:center;gap:3px 8px;padding:9px 10px;overflow-wrap:anywhere}
+  header.site nav.main .drop small{font-size:11px}
+}

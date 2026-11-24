@@ -10,6 +10,20 @@
     if (e.key === 'Escape') { nav.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', 'Ouvrir le menu'); btn.focus(); }
   });
 
+  if (btn && nav) {
+    function closeMenu() {
+      nav.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Ouvrir le menu');
+    }
+    document.addEventListener('pointerdown', function (event) {
+      if (!nav.contains(event.target) && !btn.contains(event.target)) closeMenu();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && nav.classList.contains('open')) { closeMenu(); btn.focus(); }
+    });
+  }
+
   // Compact header search, controlled by the inline magnifying glass.
   var searchToggle = document.getElementById('mobileSearchBtn');
   var mobileSearch = document.getElementById('mobile-search');
