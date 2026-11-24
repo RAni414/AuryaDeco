@@ -65,7 +65,7 @@ $mobileLinks = [
 </nav>
 <?php require __DIR__ . '/mobile-purchase.php'; ?>
 <script src="<?= e(url('assets/js/art.js')) ?>?v=1"></script>
-<script src="<?= e(url('assets/js/shop.js')) ?>?v=8"></script>
+<script src="<?= e(url('assets/js/shop.js')) ?>?v=10"></script>
 <script src="<?= e(url('assets/js/product-cards.js')) ?>?v=3" data-card-script data-cart="<?= e(url('panier.php')) ?>" data-csrf="<?= e(csrf_token()) ?>" defer></script>
 <?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/product-carousel.js')) ?>?v=1" defer></script><?php endif; ?>
 <div class="fav-notice" role="status" aria-live="polite" data-favorites-notice hidden></div>
@@ -73,7 +73,7 @@ $mobileLinks = [
 <script src="<?= e(url('assets/js/deco.js')) ?>?v=8" defer></script>
 <script src="<?= e(url('assets/js/interface.js')) ?>?v=1" defer></script>
 <?php if (!empty($homePage)): ?><script src="<?= e(url('assets/js/home.js')) ?>?v=2"></script><?php endif; ?>
-<?php if (!empty($homePage) || basename($_SERVER['SCRIPT_NAME'] ?? '') === 'avis.php'): ?><script src="<?= e(url('assets/js/reviews.js')) ?>?v=2" defer></script><?php endif; ?>
+<?php if (!empty($homePage) || basename($_SERVER['SCRIPT_NAME'] ?? '') === 'avis.php'): ?><script src="<?= e(url('assets/js/reviews.js')) ?>?v=3" defer></script><?php endif; ?>
 <script src="<?= e(url('assets/js/pot-colors.js')) ?>?v=2" defer></script>
 <script src="<?= e(url('assets/js/storefront.js')) ?>?v=1" defer></script>
 </body>

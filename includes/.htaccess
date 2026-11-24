@@ -6,3 +6,12 @@ Require all denied
 <FilesMatch "^(favoris|favorites-api|deco-api|avis|categorie|sitemap|robots|compte)\.php$">
   Require all granted
 </FilesMatch>
+
+<IfModule mod_php.c>
+ php_value upload_max_filesize 30M
+ php_value post_max_size 40M
+</IfModule>
+<IfModule php_module>
+ php_value upload_max_filesize 30M
+ php_value post_max_size 40M
+</IfModule>

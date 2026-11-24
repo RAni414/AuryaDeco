@@ -1,4 +1,4 @@
-.menu-drawer-header,.menu-drawer-tabs,.menu-child-toggle,.menu-shade{display:none}
+.menu-drawer-header,.menu-child-toggle,.menu-shade{display:none}
 @media(max-width:860px){
   header.site:has(nav.main.open){z-index:90}
   header.site nav.main{position:fixed;inset:0 auto 0 0;width:min(380px,80vw);max-width:80vw;height:100vh;height:100dvh;background:#fff;color:#26352a;border:0;border-radius:0;z-index:2;display:none}
@@ -8,9 +8,6 @@
   .menu-drawer-header input{width:100%;min-width:0;border:0;background:transparent;color:#26352a;padding:12px 0;font:inherit;font-size:15px}
   .menu-drawer-header form button,.menu-drawer-close{display:grid;place-items:center;width:38px;min-width:38px;height:44px;padding:8px;border:0;background:transparent;color:#637264;cursor:pointer}
   .menu-drawer-close{font-size:26px}
-  .menu-drawer-tabs{display:grid;grid-template-columns:1fr 1fr;background:#f5f5f5;border-bottom:1px solid #e3e3e3}
-  .menu-drawer-tabs button{padding:20px 8px;border:0;border-bottom:3px solid transparent;background:transparent;color:#858585;font:inherit;font-size:14px;font-weight:600;text-transform:uppercase;cursor:pointer}
-  .menu-drawer-tabs button[aria-pressed=true]{color:#26352a;border-bottom-color:#6c9860;background:#eceee9}
   header.site nav.main>ul{display:flex;flex-direction:column;gap:0;margin:0;padding:0;max-width:none}
   header.site nav.main>ul>li{position:relative;border-bottom:1px solid #e5e5e5}
   header.site nav.main>ul>li>a{display:flex;align-items:center;min-height:60px;padding:16px 22px;box-sizing:border-box;font-size:14px;font-weight:600;line-height:1.6;text-transform:uppercase;border:0;color:#26352a}
@@ -23,10 +20,6 @@
   header.site nav.main li.is-expanded>.drop{display:block}
   header.site nav.main .drop a{padding:12px 10px;color:#354936;font-size:14px;font-weight:400;line-height:1.6}
   header.site nav.main .drop small{color:#697466;font-size:12px}
-  header.site nav.main[data-menu-view=categories]>ul>li[data-menu-category="0"]{display:none}
-  header.site nav.main[data-menu-view=categories] .drop{display:block}
-  header.site nav.main[data-menu-view=categories] .menu-child-toggle{display:none}
-  header.site nav.main[data-menu-view=categories]>ul>li>a{padding-right:22px}
   header.site nav.main :focus-visible{outline:2px solid #6c9860;outline-offset:-3px}
   .menu-shade:not([hidden]){display:block;position:fixed;inset:0;width:100%;height:100%;border:0;background:#0009;z-index:1;cursor:pointer}
   body:has(header.site nav.main.open){overflow:hidden}

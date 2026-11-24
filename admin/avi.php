@@ -1,9 +1,10 @@
 <?php
 require __DIR__ . '/../includes/admin.php';
 require_admin();
+require_once __DIR__ . '/../includes/review-service.php';
 
 $id = (int)($_GET['id'] ?? 0);
-$r = ['id' => 0, 'name' => '', 'city' => '', 'rating' => 5, 'comment' => '', 'photo' => null, 'active' => 1, 'position' => 0];
+$r = ['id' => 0, 'name' => '', 'city' => '', 'rating' => 5, 'comment' => '', 'photo' => null, 'video' => null, 'active' => 1, 'position' => 0];
 if ($id) {
     $st = db()->prepare('SELECT * FROM reviews WHERE id = ?');
     $st->execute([$id]);
@@ -26,29 +27,41 @@ if (is_post()) {
 
     $newFile = null;
     $oldFile = $r['photo'];
+    $oldVideo = $r['video'] ?? null;
+    $newVideo = null;
     if (!$errors) {
         try {
-            if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] !== UPLOAD_ERR_NO_FILE) {
-                $newFile = save_upload(['name' => $_FILES['photo']['name'], 'tmp_name' => $_FILES['photo']['tmp_name'], 'error' => $_FILES['photo']['error'], 'size' => $_FILES['photo']['size']]);
+            $media = customer_review_upload_choice($_FILES);
+            if ($media['photo']) {
+                $newFile = customer_review_photo($media['photo']);
                 $r['photo'] = $newFile;
-            } elseif (!empty($_POST['del_photo'])) {
+                $r['video'] = null;
+            } elseif ($media['video']) {
+                $newVideo = customer_review_video($media['video']);
+                $r['video'] = $newVideo;
                 $r['photo'] = null;
+            } else {
+                if (!empty($_POST['del_photo'])) $r['photo'] = null;
+                if (!empty($_POST['del_video'])) $r['video'] = null;
             }
             if ($id) {
-                db()->prepare('UPDATE reviews SET name=?, city=?, rating=?, comment=?, photo=?, active=? WHERE id=?')
-                    ->execute([$r['name'], $r['city'] ?: null, $r['rating'], $r['comment'], $r['photo'], $r['active'], $id]);
+                db()->prepare('UPDATE reviews SET name=?, city=?, rating=?, comment=?, photo=?, video=?, active=? WHERE id=?')
+                    ->execute([$r['name'], $r['city'] ?: null, $r['rating'], $r['comment'], $r['photo'], $r['video'], $r['active'], $id]);
             } else {
                 // Un nouvel avis s'affiche en premier.
                 db()->exec('UPDATE reviews SET position = position + 1');
-                db()->prepare('INSERT INTO reviews (name, city, rating, comment, photo, active, position) VALUES (?,?,?,?,?,?,0)')
-                    ->execute([$r['name'], $r['city'] ?: null, $r['rating'], $r['comment'], $r['photo'], $r['active']]);
+                db()->prepare('INSERT INTO reviews (name, city, rating, comment, photo, video, active, position) VALUES (?,?,?,?,?,?,?,0)')
+                    ->execute([$r['name'], $r['city'] ?: null, $r['rating'], $r['comment'], $r['photo'], $r['video'], $r['active']]);
                 $id = (int)db()->lastInsertId();
             }
             if ($oldFile && $oldFile !== $r['photo']) @unlink(UPLOAD_DIR . '/' . basename($oldFile));
+            if ($oldVideo && $oldVideo !== $r['video']) @unlink(UPLOAD_DIR . '/' . basename($oldVideo));
             flash('Avis enregistré.');
             redirect('admin/avis.php');
         } catch (Throwable $ex) {
             if ($newFile) @unlink(UPLOAD_DIR . '/' . $newFile);
+            if ($newVideo) @unlink(UPLOAD_DIR . '/' . $newVideo);
+            $r['video'] = $oldVideo;
             $r['photo'] = $oldFile;
             $errors[] = $ex instanceof RuntimeException ? $ex->getMessage() : "L'enregistrement a échoué : " . $ex->getMessage();
         }
@@ -74,7 +87,13 @@ admin_header($r['id'] ? "Modifier l'avis" : 'Nouvel avis', 'avis');
       <label class="field">Ce que dit le client<textarea name="comment" id="comment" rows="6" maxlength="800" required placeholder="Recopiez le message du client tel qu'il vous l'a envoyé."><?= e($r['comment']) ?></textarea></label>
       <p class="hint"><span id="count"><?= mb_strlen($r['comment']) ?></span> / 800 caractères. Ajoutez uniquement de vrais avis de vos clients.</p>
     </fieldset>
-    <fieldset class="fs"><legend>Photo</legend>
+    <fieldset class="fs"><legend>Photo ou vidéo</legend>
+      <?php if (!empty($r['video'])): ?>
+        <video controls playsinline preload="metadata" style="width:100%;max-width:460px;max-height:320px" src="<?= e(url('uploads/' . $r['video'])) ?>"></video>
+        <label class="check"><input type="checkbox" name="del_video" value="1"> Supprimer cette vidéo</label>
+      <?php endif; ?>
+      <label class="field">Ajouter ou remplacer la vidéo (MP4 ou WebM, 25 Mo maximum)<input type="file" name="video" accept="video/mp4,video/webm"></label>
+      <p class="hint">Une seule photo ou vidéo par avis. Un nouveau média remplace le précédent.</p>
       <?php if ($r['photo']): ?>
         <div class="photos" style="max-width:260px"><div class="photo"><img src="<?= e(url('uploads/' . $r['photo'])) ?>" alt=""><div class="pa"><label class="check sm danger"><input type="checkbox" name="del_photo" value="1"> Supprimer cette photo</label></div></div></div>
       <?php endif; ?>

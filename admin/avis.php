@@ -10,10 +10,10 @@ if (is_post()) {
         db()->prepare('UPDATE reviews SET active = 1 - active WHERE id = ?')->execute([$id]);
         flash("Visibilité de l'avis modifiée.");
     } elseif ($act === 'delete') {
-        $st = db()->prepare('SELECT photo FROM reviews WHERE id = ?');
+        $st = db()->prepare('SELECT photo, video FROM reviews WHERE id = ?');
         $st->execute([$id]);
-        $f = $st->fetchColumn();
-        if ($f) @unlink(UPLOAD_DIR . '/' . basename($f));
+        $media = $st->fetch();
+        foreach (['photo', 'video'] as $kind) { if (!empty($media[$kind])) @unlink(UPLOAD_DIR . '/' . basename($media[$kind])); }
         db()->prepare('DELETE FROM reviews WHERE id = ?')->execute([$id]);
         flash('Avis supprimé.');
     } elseif ($act === 'up' || $act === 'down') {
@@ -42,11 +42,11 @@ admin_header('Avis clients', 'avis');
   <div class="empty">Vous n'avez pas encore d'avis. Ajoutez le premier avec la photo et le commentaire d'un client.<br><br><a class="btn" href="<?= e(url('admin/avi.php')) ?>">Ajouter un avis</a></div>
 <?php else: ?>
 <div class="atable-wrap"><table class="at">
-  <thead><tr><th>Photo</th><th>Client</th><th>Note</th><th>Commentaire</th><th>Visible</th><th class="r">Actions</th></tr></thead>
+  <thead><tr><th>Média</th><th>Client</th><th>Note</th><th>Commentaire</th><th>Visible</th><th class="r">Actions</th></tr></thead>
   <tbody>
   <?php foreach ($list as $i => $r): ?>
     <tr class="<?= $r['active'] ? '' : 'inactive' ?>">
-      <td><div class="th"><?php if ($r['photo']): ?><img class="ph" src="<?= e(url('uploads/' . $r['photo'])) ?>" alt=""><?php else: ?><span class="avatar" aria-hidden="true"><?= e(mb_strtoupper(mb_substr($r['name'], 0, 1))) ?></span><?php endif; ?></div></td>
+      <td><div class="th"><?php if (!empty($r['video'])): ?><a href="<?= e(url('admin/avi.php?id=' . $r['id'])) ?>">Voir la vidéo</a><?php elseif ($r['photo']): ?><img class="ph" src="<?= e(url('uploads/' . $r['photo'])) ?>" alt=""><?php else: ?><span class="avatar" aria-hidden="true"><?= e(mb_strtoupper(mb_substr($r['name'], 0, 1))) ?></span><?php endif; ?></div></td>
       <td><a class="nm" href="<?= e(url('admin/avi.php?id=' . $r['id'])) ?>"><?= e($r['name']) ?></a><div class="sub"><?= e($r['city']) ?></div></td>
       <td><?= stars_html((int)$r['rating']) ?></td>
       <td class="clip"><?= e(mb_strlen($r['comment']) > 110 ? mb_substr($r['comment'], 0, 110) . '…' : $r['comment']) ?></td>

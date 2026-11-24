@@ -467,6 +467,10 @@ function review_card(array $r, int $i = 1, int $n = 1): string
         . ($r['city'] ? '<small>' . e($r['city']) . '</small>' : '') . review_date_html($r) . '</span></div>';
     $quote = '<blockquote>' . nl2br(e($r['comment'])) . '</blockquote>';
     $attrs = ' role="group" aria-roledescription="diapositive" aria-label="Avis ' . $i . ' sur ' . $n . '"';
+    if (!empty($r['video'])) {
+        $src = e(url('uploads/' . $r['video']));
+        return '<figure class="rcard"' . $attrs . '><video class="review-video" controls playsinline preload="none" aria-label="Vidéo de ' . e($r['name']) . '"><source src="' . $src . '" type="' . (str_ends_with($r['video'], '.webm') ? 'video/webm' : 'video/mp4') . '">Votre navigateur ne peut pas lire cette vidéo.</video><figcaption class="rbody">' . stars_html((int)$r['rating']) . $quote . $who . '</figcaption></figure>';
+    }
     if ($r['photo']) {
         $src = e(url('uploads/' . $r['photo']));
         return '<figure class="rcard"' . $attrs . '>'

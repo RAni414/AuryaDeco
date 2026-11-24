@@ -22,17 +22,23 @@ unset($_SESSION['review_success']);
       </div>
       <label>Votre note <span aria-hidden="true">*</span><select name="rating" required><option value="">Choisir une note</option><?php for ($rating = 5; $rating >= 1; $rating--): ?><option value="<?= $rating ?>" <?= (string)$reviewValues['rating'] === (string)$rating ? 'selected' : '' ?>><?= $rating ?> / 5 — <?= str_repeat('★', $rating) ?></option><?php endfor; ?></select></label>
       <label>Votre avis <span aria-hidden="true">*</span><textarea name="comment" rows="4" maxlength="800" required placeholder="Racontez-nous votre expérience…"><?= e($reviewValues['comment']) ?></textarea></label>
-      <div class="review-photo">
-        <label>Ajouter une photo <span class="customer-review__optional">(facultatif)</span><input type="file" name="photo" accept="image/jpeg,image/png,image/webp" data-review-photo aria-describedby="review-photo-help"></label>
-        <p class="customer-review__note" id="review-photo-help">JPG, PNG ou WebP · 5 Mo maximum. Après une erreur d’envoi, sélectionnez à nouveau votre photo.</p>
-        <p class="review-photo__error" data-review-photo-error role="alert" hidden></p>
-        <div class="review-photo__preview" data-review-photo-preview hidden>
-          <img alt="Aperçu de votre photo" data-review-photo-image>
-          <button class="btn ghost" type="button" data-review-photo-remove>Retirer la photo</button>
+      <fieldset class="review-media" data-review-media>
+        <legend>Une photo ou une vidéo <span class="customer-review__optional">(facultatif)</span></legend>
+        <div class="review-media__actions">
+          <label class="review-media__picker">Prendre une photo<input type="file" name="camera_photo" accept="image/jpeg,image/png,image/webp" capture="environment" data-review-media-input="photo" aria-label="Prendre une photo avec votre téléphone"></label>
+          <label class="review-media__picker">Choisir une photo<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" data-review-media-input="photo" aria-label="Choisir une photo existante"></label>
+          <label class="review-media__picker">Ajouter une vidéo<input type="file" name="video" accept="video/mp4,video/webm" data-review-media-input="video" aria-label="Choisir une vidéo"></label>
         </div>
-      </div>
+        <p class="customer-review__note">Une seule pièce jointe : photo JPG, PNG ou WebP (5 Mo maximum), ou vidéo MP4 / WebM (25 Mo maximum). Sur ordinateur, le bouton photo ouvre le choix d’un fichier.</p>
+        <p class="review-photo__error" data-review-media-error role="alert" hidden></p>
+        <div class="review-media__preview" data-review-media-preview hidden>
+          <img alt="Aperçu de votre photo" data-review-media-image hidden>
+          <span data-review-media-name></span>
+          <button class="btn ghost" type="button" data-review-media-remove>Retirer le média</button>
+        </div>
+      </fieldset>
       <div class="customer-review__trap" aria-hidden="true"><label>Site internet<input name="website" tabindex="-1" autocomplete="off"></label></div>
-      <p class="customer-review__note">800 caractères maximum. Votre nom, votre ville, votre commentaire et votre photo pourront être publiés. Évitez de partager vos coordonnées personnelles.</p>
+      <p class="customer-review__note">800 caractères maximum. Votre nom, votre ville, votre commentaire et votre photo ou vidéo pourront être publiés. Évitez de partager vos coordonnées personnelles.</p>
       <button class="btn" type="submit">Envoyer mon avis</button>
     </form>
   </div>

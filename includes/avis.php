@@ -11,6 +11,7 @@ if (is_post()) {
     }
     csrf_check();
     $reviewPhoto = null;
+    $reviewVideo = null;
     try {
         foreach ($reviewValues as $key => $value) if (is_string($_POST[$key] ?? null)) $reviewValues[$key] = $_POST[$key];
         $review = customer_review_values($_POST);
@@ -19,18 +20,21 @@ if (is_post()) {
             http_response_code(429);
             throw new InvalidArgumentException('Votre avis a déjà été envoyé. Patientez une minute avant un nouvel envoi.');
         }
-        if (isset($_FILES['photo']) && !is_array($_FILES['photo'])) throw new InvalidArgumentException('La photo envoyée est invalide.');
-        $reviewPhoto = customer_review_photo($_FILES['photo'] ?? null);
-        save_customer_review(db(), $review, $reviewPhoto);
+        $media = customer_review_upload_choice($_FILES);
+        $reviewPhoto = customer_review_photo($media['photo']);
+        $reviewVideo = customer_review_video($media['video']);
+        save_customer_review(db(), $review, $reviewPhoto, $reviewVideo);
         $_SESSION['last_review_at'] = time();
         $_SESSION['review_success'] = 'Merci ! Votre avis a été envoyé et sera publié après validation par notre équipe.';
         header('Location: ' . url('index.php#laisser-avis'), true, 303);
         exit;
     } catch (InvalidArgumentException $e) {
         if ($reviewPhoto) @unlink(UPLOAD_DIR . '/' . basename($reviewPhoto));
+        if ($reviewVideo) @unlink(UPLOAD_DIR . '/' . basename($reviewVideo));
         $reviewError = $e->getMessage();
     } catch (Throwable $e) {
         if ($reviewPhoto) @unlink(UPLOAD_DIR . '/' . basename($reviewPhoto));
+        if ($reviewVideo) @unlink(UPLOAD_DIR . '/' . basename($reviewVideo));
         error_log('Customer review submission: ' . $e->getMessage());
         http_response_code(503);
         $reviewError = 'L’envoi est momentanément indisponible. Votre texte est conservé ci-dessous ; réessayez plus tard.';

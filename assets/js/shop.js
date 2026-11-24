@@ -23,12 +23,6 @@
     var closeMenuButton = nav.querySelector('[data-menu-close]');
     if (closeMenuButton) closeMenuButton.addEventListener('click', function () { setMenuOpen(false, true); });
     if (menuShade) menuShade.addEventListener('click', function () { setMenuOpen(false, true); });
-    nav.querySelectorAll('[data-menu-view]').forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        nav.dataset.menuView = tab.dataset.menuView;
-        nav.querySelectorAll('button[data-menu-view]').forEach(function (button) { button.setAttribute('aria-pressed', String(button === tab)); });
-      });
-    });
     nav.querySelectorAll('[data-menu-children]').forEach(function (toggle) {
       toggle.addEventListener('click', function () {
         var open = toggle.closest('li').classList.toggle('is-expanded');
@@ -203,12 +197,19 @@
     window.addEventListener('resize', build);
 
     band.addEventListener('click', function (e) {
+      if (e.target.closest('.rarrow, .rdots button')) track.querySelectorAll('video').forEach(function (v) { v.pause(); });
       var a = e.target.closest('.rarrow');
       if (a) { stop(); move(parseInt(a.dataset.dir, 10)); return; }
       var d = e.target.closest('.rdots button');
       if (d) { stop(); go(parseInt(d.dataset.i, 10)); }
     });
+    track.addEventListener('play', function (e) {
+      if (e.target.tagName !== 'VIDEO') return;
+      stop();
+      track.querySelectorAll('video').forEach(function (v) { if (v !== e.target) v.pause(); });
+    }, true);
     track.addEventListener('keydown', function (e) {
+      if (e.target.closest('video')) return;
       if (e.key === 'ArrowRight') { e.preventDefault(); stop(); move(1); }
       else if (e.key === 'ArrowLeft') { e.preventDefault(); stop(); move(-1); }
     });
@@ -217,7 +218,7 @@
     var down = false, startX = 0, startLeft = 0, moved = false;
     track.addEventListener('pointerdown', function (e) {
       stop();
-      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      if (e.target.closest('video') || e.pointerType !== 'mouse' || e.button !== 0) return;
       down = true; moved = false; startX = e.clientX; startLeft = track.scrollLeft;
     });
     window.addEventListener('pointermove', function (e) {

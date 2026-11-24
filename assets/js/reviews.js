@@ -1,39 +1,38 @@
 (function () {
   'use strict';
-  document.querySelectorAll('[data-review-photo]').forEach(function (input) {
-    var container = input.closest('.review-photo');
-    var preview = container.querySelector('[data-review-photo-preview]');
-    var image = container.querySelector('[data-review-photo-image]');
-    var error = container.querySelector('[data-review-photo-error]');
+  document.querySelectorAll('[data-review-media]').forEach(function (container) {
+    var inputs = Array.from(container.querySelectorAll('[data-review-media-input]'));
+    var preview = container.querySelector('[data-review-media-preview]');
+    var image = container.querySelector('[data-review-media-image]');
+    var name = container.querySelector('[data-review-media-name]');
+    var error = container.querySelector('[data-review-media-error]');
     var objectUrl = null;
-    function reset() {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      objectUrl = null;
-      preview.hidden = true;
-      image.removeAttribute('src');
+    function resetPreview() {
+      image.removeAttribute('src'); image.hidden = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl); objectUrl = null;
+      preview.hidden = true; name.textContent = '';
     }
-    input.addEventListener('change', function () {
-      reset();
-      error.hidden = true;
-      var photo = input.files && input.files[0];
-      if (!photo) return;
-      if (photo.size > 5 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(photo.type)) {
-        error.textContent = 'Choisissez une photo JPG, PNG ou WebP de 5 Mo maximum.';
-        error.hidden = false;
-        input.value = '';
-        return;
-      }
-      objectUrl = URL.createObjectURL(photo);
-      image.src = objectUrl;
-      preview.hidden = false;
+    inputs.forEach(function (input) {
+      input.addEventListener('change', function () {
+        var file = input.files && input.files[0];
+        if (!file) return;
+        resetPreview(); error.hidden = true;
+        inputs.forEach(function (other) { if (other !== input) other.value = ''; });
+        var isVideo = input.dataset.reviewMediaInput === 'video';
+        var types = isVideo ? ['video/mp4', 'video/webm'] : ['image/jpeg', 'image/png', 'image/webp'];
+        var limit = (isVideo ? 25 : 5) * 1024 * 1024;
+        if (!types.includes(file.type) || file.size > limit) {
+          error.textContent = isVideo ? 'Choisissez une vidéo MP4 ou WebM de 25 Mo maximum.' : 'Choisissez une photo JPG, PNG ou WebP de 5 Mo maximum.';
+          error.hidden = false; input.value = ''; return;
+        }
+        if (!isVideo) { objectUrl = URL.createObjectURL(file); image.src = objectUrl; image.hidden = false; }
+        name.textContent = file.name; preview.hidden = false;
+      });
     });
-    container.querySelector('[data-review-photo-remove]').addEventListener('click', function () {
-      input.value = '';
-      error.hidden = true;
-      reset();
-      input.focus();
+    container.querySelector('[data-review-media-remove]').addEventListener('click', function () {
+      inputs.forEach(function (input) { input.value = ''; }); error.hidden = true; resetPreview(); inputs[0].focus();
     });
-    input.form.addEventListener('reset', reset);
+    inputs[0].form.addEventListener('reset', resetPreview);
   });
   var entry = document.querySelector('[data-review-entry]');
   var dialog = document.getElementById('review-dialog');
@@ -55,7 +54,7 @@
   }
   opener.addEventListener('click', function (event) { event.preventDefault(); open(); });
   dialog.querySelector('[data-review-close]').addEventListener('click', function () { dialog.close(); });
-  dialog.addEventListener('close', function () { opener.focus({preventScroll:true}); });
+  dialog.addEventListener('close', function () { dialog.querySelectorAll('video').forEach(function (video) { video.pause(); }); opener.focus({preventScroll:true}); });
   // Show confirmation after the successful POST redirect.
   if (window.location.hash === '#laisser-avis') open();
 })();

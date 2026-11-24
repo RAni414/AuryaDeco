@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Version 2 : frais de livraison par produit + avis clients.
  * Les produits, commandes et photos existants ne sont pas touchés.
  */
-const DB_VERSION = 8;
+const DB_VERSION = 9;
 
 function run_migrations(PDO $pdo): void
 {
@@ -100,6 +100,10 @@ function run_migrations(PDO $pdo): void
             $query->execute([$column]);
             if (!$query->fetchColumn()) $pdo->exec('ALTER TABLE products ADD COLUMN ' . $column . ' ' . $definition);
         }
+    }
+    if ($cur < 9) {
+        $query = $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='reviews' AND COLUMN_NAME='video'");
+        if (!$query->fetchColumn()) $pdo->exec('ALTER TABLE reviews ADD COLUMN video VARCHAR(255) NULL AFTER photo');
     }
     $pdo->prepare("INSERT INTO settings (k, v) VALUES ('db_version', ?) ON DUPLICATE KEY UPDATE v = VALUES(v)")->execute([(string)DB_VERSION]);
 }

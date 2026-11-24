@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/review-media.php';
 function customer_review_values(array $input): array
 {
     $values = [];
@@ -34,10 +35,11 @@ function customer_review_photo(?array $file): ?string
     return save_upload($file);
 }
 
-function save_customer_review(PDO $pdo, array $review, ?string $photo = null): int
+function save_customer_review(PDO $pdo, array $review, ?string $photo = null, ?string $video = null): int
 {
     // Public submissions always wait for the administrator's publication.
-    $pdo->prepare('INSERT INTO reviews (name, city, rating, comment, photo, active, position) VALUES (?,?,?,?,?,0,0)')
-        ->execute([$review['name'], $review['city'] ?: null, $review['rating'], $review['comment'], $photo]);
+    if ($photo !== null && $video !== null) throw new InvalidArgumentException('Choisissez une photo ou une vidéo pour cet avis.');
+    $pdo->prepare('INSERT INTO reviews (name, city, rating, comment, photo, video, active, position) VALUES (?,?,?,?,?,?,0,0)')
+        ->execute([$review['name'], $review['city'] ?: null, $review['rating'], $review['comment'], $photo, $video]);
     return (int)$pdo->lastInsertId();
 }
