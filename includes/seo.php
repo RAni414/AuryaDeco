@@ -74,6 +74,12 @@ function seo_metadata(string $script, array $query, ?array $product, ?array $cat
         $meta['canonical'] = seo_url('boutique.php' . ($filters ? '?' . http_build_query($filters) : ''));
         $meta['title'] = ($pageTitle ?: 'Plantes, pots et accessoires déco') . ' en Tunisie | ' . $name;
         if ($meta['description'] === '') $meta['description'] = 'Découvrez ' . mb_strtolower($pageTitle ?: 'notre collection de plantes, pots et accessoires déco') . ' chez ' . $name . '. Consultez les prix en TND et commandez avec livraison en Tunisie.';
+        require_once __DIR__ . '/plant-category-content.php';
+        if (plant_category_is_main($query)) {
+            $plantContent = plant_category_content();
+            $meta['title'] = $plantContent['seo_title'];
+            $meta['description'] = $plantContent['description'];
+        }
         foreach (['q', 'min', 'max', 'color', 'pot_size', 'usage', 'available'] as $extraFilter) if (!empty($query[$extraFilter])) $meta['index'] = false;
     } elseif ($script === 'categorie.php' && $category) {
         $meta['canonical'] = seo_url('includes/categorie.php?id=' . (int)$category['id']);

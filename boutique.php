@@ -32,6 +32,9 @@ elseif ($tri === 'nom') $order = 'p.name ASC';
 $list = load_products(implode(' AND ', $where), $params, $order);
 
 $title = $q !== '' ? 'Résultats pour « ' . $q . ' »' : ($promo ? 'Promotions' : (isset(BANDS[$taille]) ? BANDS[$taille] : (isset(MATS[$mat]) ? 'Pots en ' . mb_strtolower(MATS[$mat]) : ($cat === 'plante' ? 'Plantes artificielles' : ($cat === 'pot' ? 'Pots' : ($cat === 'acc' ? 'Accessoires' : 'Toute la boutique'))))));
+require_once __DIR__ . '/includes/plant-category-content.php';
+$plantCategoryContent = plant_category_is_main($_GET) ? plant_category_content() : null;
+if ($plantCategoryContent) $title = $plantCategoryContent['title'];
 $pageTitle = $title;
 
 function shop_link(array $over): string
@@ -45,6 +48,7 @@ require __DIR__ . '/includes/header.php';
 <div class="wrap">
   <div class="crumbs"><a href="<?= e(url('index.php')) ?>">Accueil</a> / <?= e($title) ?></div>
   <h1 class="ptitle"><?= e($title) ?></h1>
+  <?php if ($plantCategoryContent): ?><p class="plant-category-intro"><?= e($plantCategoryContent['description']) ?></p><?php endif; ?>
   <?php if ($cat === 'plante'): ?>
     <div class="chips">
       <a class="chip" href="<?= e(shop_link(['taille' => ''])) ?>" aria-current="<?= $taille === '' ? 'true' : 'false' ?>">Toutes</a>
