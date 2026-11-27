@@ -1,0 +1,10 @@
+.black-friday-banner{overflow:hidden;background:#080808;color:#fff;width:100%;font-size:14px;line-height:1.4;letter-spacing:.03em}
+.black-friday-banner__track{display:flex;width:max-content;animation:aurya-announcement-scroll 38s linear infinite}
+.black-friday-banner__group{display:flex;align-items:center;flex-shrink:0}
+.black-friday-banner__group>span{display:flex;align-items:center;white-space:nowrap;gap:18px;padding:12px 36px}
+.black-friday-banner strong{font-weight:700;letter-spacing:.1em}
+.black-friday-banner__dot{color:#d6bc88;font-size:22px;line-height:1}
+.black-friday-banner:hover .black-friday-banner__track{animation-play-state:paused}
+@keyframes aurya-announcement-scroll{to{transform:translateX(-50%)}}
+@media(max-width:600px){.black-friday-banner{font-size:12px}.black-friday-banner__group>span{padding:10px 24px;gap:12px}}
+@media(prefers-reduced-motion:reduce){.black-friday-banner__track{animation:none;width:100%}.black-friday-banner__group{width:100%;justify-content:center}.black-friday-banner__group>span{white-space:normal;text-align:center;flex-wrap:wrap;justify-content:center;padding:10px 14px;gap:8px}.black-friday-banner__group[aria-hidden=true],.black-friday-banner__group>span[aria-hidden=true]{display:none}}

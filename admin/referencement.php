@@ -60,4 +60,5 @@ admin_header('Référencement Google', 'referencement');
   <p><a href="<?= e(seo_url('sitemap.xml')) ?>" target="_blank" rel="noopener">Voir le sitemap en ligne</a> · <a href="<?= e(seo_url('robots.txt')) ?>" target="_blank" rel="noopener">Voir robots.txt</a></p>
   <p class="hint">Le sitemap et les règles Apache sont actifs après déploiement sur le serveur. Google peut prendre plusieurs jours ou semaines pour explorer les pages.</p>
 </div>
+<?php require __DIR__ . '/plant-seo-audit.php'; ?>
 <?php admin_footer();

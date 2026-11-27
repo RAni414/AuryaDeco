@@ -32,3 +32,9 @@ verify_seo(mb_strlen(seo_text(str_repeat('é', 250))) <= 180, 'description trunc
 $p['name'] = '</script><script>alert(1)</script>';
 $json = json_encode(seo_product_schema($p), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 verify_seo(!str_contains($json, '<script>'), 'structured data safely encodes product text');
+
+$plantBand = seo_metadata('boutique.php', ['cat'=>'plante','taille'=>'petites'], null, null, 'Petites tailles', '');
+verify_seo(str_contains($plantBand['title'], 'Petites plantes artificielles'), 'plant height categories use explicit product terms');
+require_once __DIR__ . '/../../includes/plant-seo-audit.php';
+verify_seo(count(plant_seo_audit(['description'=>'','images'=>[],'variants'=>[]])) === 3, 'plant audit identifies missing description, media and sizes');
+verify_seo(plant_seo_audit(['description'=>str_repeat('Description ', 15), 'images'=>[['file'=>'a.jpg'],['file'=>'b.jpg']], 'variants'=>[['height'=>150,'price'=>59]]]) === [], 'complete product passes content checks');

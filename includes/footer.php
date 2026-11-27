@@ -1,3 +1,4 @@
+<?php require __DIR__ . '/plant-category-guide.php'; ?>
 <?php if (!empty($homePage)): require __DIR__ . '/review-dialog.php'; endif; ?>
 </main>
 

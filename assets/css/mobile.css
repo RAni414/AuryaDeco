@@ -107,3 +107,9 @@ header.site .logo .aurya-brand-image{display:block;width:180px;height:90px;objec
   header.site nav.main .drop a{padding:10px;font-size:14px}
   header.site nav.main .drop small{font-size:12px}
 }
+
+/* Account entry uses an explicit label instead of the user icon. */
+header.site .hrow .header-account{display:flex;align-items:center;justify-content:center;width:auto;min-width:0;padding:0 10px;border-radius:8px;text-align:center}
+header.site .header-account__label{display:inline;font-size:13px;font-weight:500;line-height:1.35;white-space:nowrap}
+@media(max-width:860px){header.site .hrow .header-account{width:76px;min-width:76px;padding:0 2px}header.site .header-account__label{font-size:11px;white-space:normal}header.site .hrow .logo .aurya-brand-image{width:clamp(76px,24vw,140px)}}
+@media(max-width:390px){header.site .hrow .header-account{width:66px;min-width:66px}header.site .header-account__label{font-size:10px}header.site .hrow .icons>.ibtn:not(.header-account){width:36px;min-width:36px}}

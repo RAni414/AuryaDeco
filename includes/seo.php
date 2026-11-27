@@ -80,6 +80,18 @@ function seo_metadata(string $script, array $query, ?array $product, ?array $cat
             $meta['title'] = $plantContent['seo_title'];
             $meta['description'] = $plantContent['description'];
         }
+        if (($filters['cat'] ?? '') === 'plante' && isset($filters['taille']) && empty($query['q']) && empty($query['promo'])) {
+            $plantTitles = [
+                'petites' => 'Petites plantes artificielles',
+                'moyennes' => 'Plantes artificielles de taille moyenne',
+                'grandes' => 'Grandes plantes artificielles',
+                'geantes' => 'Plantes artificielles géantes',
+                'tombantes' => 'Plantes artificielles tombantes',
+            ];
+            $plantTitle = $plantTitles[$filters['taille']];
+            $meta['title'] = $plantTitle . ' en Tunisie | ' . $name;
+            $meta['description'] = $plantTitle . ' : consultez les modèles, leurs dimensions et leurs prix en TND chez ' . $name . '. Livraison en Tunisie.';
+        }
         foreach (['q', 'min', 'max', 'color', 'pot_size', 'usage', 'available'] as $extraFilter) if (!empty($query[$extraFilter])) $meta['index'] = false;
     } elseif ($script === 'categorie.php' && $category) {
         $meta['canonical'] = seo_url('includes/categorie.php?id=' . (int)$category['id']);
