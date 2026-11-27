@@ -15,12 +15,13 @@ $commercePage = in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), ['panier.php',
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <?php require __DIR__ . '/seo-head.php'; ?>
+<?php require __DIR__ . '/meta-head.php'; ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(url('assets/css/style.css')) ?>?v=1">
 <link rel="stylesheet" href="<?= e(url('assets/css/deco.css')) ?>?v=3">
-<link rel="stylesheet" href="<?= e(url('assets/css/interface.css')) ?>?v=3">
+<link rel="stylesheet" href="<?= e(url('assets/css/interface.css')) ?>?v=4">
 <link rel="stylesheet" href="<?= e(url('assets/css/favorites.css')) ?>?v=1">
 <link rel="stylesheet" href="<?= e(url('assets/css/product-cards.css')) ?>?v=2">
 <link rel="stylesheet" href="<?= e(url('assets/css/pot-colors.css')) ?>?v=2">
